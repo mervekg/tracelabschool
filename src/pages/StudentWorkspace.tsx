@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Undo2, Redo2, Save, Send, Plus, Timer, Palette, PenTool, Eraser, Mic, MicOff, Volume2, Zap } from "lucide-react";
+import { Undo2, Redo2, Save, Send, Plus, Timer, Palette, PenTool, Eraser, Mic, MicOff, Volume2, Zap, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,9 +8,11 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const StudentWorkspace = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [writingTime, setWritingTime] = useState(12);
   const [handwrittenText, setHandwrittenText] = useState("Once upon a time, there was a curious student named Emma who loved to explore...");
   const [penColor, setPenColor] = useState("#000000");
@@ -21,6 +23,8 @@ const StudentWorkspace = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [speechToTextEnabled, setSpeechToTextEnabled] = useState(true); // Set by school accommodation
   const [focusModeAutoOn, setFocusModeAutoOn] = useState(true); // Set by accommodation
+  const [teacherComment, setTeacherComment] = useState("");
+  const [showSidebar, setShowSidebar] = useState(!isMobile);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
@@ -140,70 +144,82 @@ const StudentWorkspace = () => {
         </>
       )}
       {/* Top Header */}
-      <div className={`border-b border-border bg-card/50 backdrop-blur p-4 transition-all duration-300 ${focusMode ? 'opacity-30 blur-sm' : 'opacity-100'}`}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className={`border-b border-border bg-card/50 backdrop-blur p-2 sm:p-4 transition-all duration-300 ${focusMode ? 'opacity-30 blur-sm' : 'opacity-100'}`}>
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
-            <h1 className="text-2xl font-bold text-primary">Paragraph Writing: My Weekend</h1>
-            <p className="text-sm text-muted-foreground">ELA • Due Tomorrow</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-primary">Paragraph Writing: My Weekend</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">ELA • Due Tomorrow</p>
           </div>
-          <div className="flex items-center gap-3">
-            {speechToTextEnabled && (
-              <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-accent/10 border border-accent/30">
-                <Volume2 className="w-4 h-4 text-accent-foreground" />
-                <span className="text-xs text-accent-foreground">Speech-to-Text ON</span>
+          <div className="flex items-center gap-2 flex-wrap">
+            {speechToTextEnabled && !isMobile && (
+              <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-accent/10 border border-accent/30">
+                <Volume2 className="w-3 h-3 sm:w-4 sm:h-4 text-accent-foreground" />
+                <span className="text-xs text-accent-foreground">Speech-to-Text</span>
               </div>
             )}
-            <Badge variant="secondary" className="flex items-center gap-1 px-3 py-1">
-              <Timer className="w-4 h-4" />
+            <Badge variant="secondary" className="flex items-center gap-1 px-2 py-1">
+              <Timer className="w-3 h-3 sm:w-4 sm:h-4" />
               {writingTime} min
             </Badge>
-            <Button variant="outline" size="sm" className="hover:bg-muted">
-              <Save className="w-4 h-4 mr-1" />
-              Save Draft
-            </Button>
+            {!isMobile && (
+              <Button variant="outline" size="sm" className="hover:bg-muted">
+                <Save className="w-4 h-4 mr-1" />
+                Save
+              </Button>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-100px)]">
-        {/* Main Writing Canvas - 80% width */}
-        <div className="flex-1 flex flex-col p-6 gap-4">
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-100px)]">
+        {/* Main Writing Canvas */}
+        <div className="flex-1 flex flex-col p-2 sm:p-4 lg:p-6 gap-2 sm:gap-4">
+          {/* Instructions Card - Mobile Only, Above Canvas */}
+          {isMobile && (
+            <Card className={`p-3 bg-accent/10 border-accent/30 transition-all duration-300 ${focusMode ? 'opacity-30 blur-sm' : 'opacity-100'}`}>
+              <h4 className="text-xs font-semibold text-accent-foreground mb-2">Instructions</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Write 5-7 sentences about your weekend. Include: Topic sentence, Descriptive words, Conclusion
+              </p>
+            </Card>
+          )}
+
           {/* Enhanced Toolbar */}
-          <Card className={`p-3 shadow-paper transition-all duration-300 ${focusMode ? 'opacity-30 blur-sm' : 'opacity-100'}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
+          <Card className={`p-2 sm:p-3 shadow-paper transition-all duration-300 ${focusMode ? 'opacity-30 blur-sm' : 'opacity-100'}`}>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
                 {/* Undo/Redo */}
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="icon" className="hover:bg-muted">
-                    <Undo2 className="w-4 h-4" />
+                  <Button variant="ghost" size="icon" className="hover:bg-muted h-8 w-8 sm:h-10 sm:w-10">
+                    <Undo2 className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="hover:bg-muted">
-                    <Redo2 className="w-4 h-4" />
+                  <Button variant="ghost" size="icon" className="hover:bg-muted h-8 w-8 sm:h-10 sm:w-10">
+                    <Redo2 className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                 </div>
 
-                <div className="w-px h-6 bg-border" />
+                {!isMobile && <div className="w-px h-6 bg-border" />}
 
                 {/* Pen Tool */}
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="bg-primary/10 hover:bg-primary/20">
-                    <PenTool className="w-4 h-4 text-primary" />
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Button variant="ghost" size="icon" className="bg-primary/10 hover:bg-primary/20 h-8 w-8 sm:h-10 sm:w-10">
+                    <PenTool className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="hover:bg-muted">
-                    <Eraser className="w-4 h-4" />
+                  <Button variant="ghost" size="icon" className="hover:bg-muted h-8 w-8 sm:h-10 sm:w-10">
+                    <Eraser className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                 </div>
 
-                <div className="w-px h-6 bg-border" />
+                {!isMobile && <div className="w-px h-6 bg-border" />}
 
                 {/* Pen Colors */}
                 <div className="flex items-center gap-1">
-                  <Palette className="w-4 h-4 text-muted-foreground mr-1" />
+                  {!isMobile && <Palette className="w-4 h-4 text-muted-foreground mr-1" />}
                   {colors.map((color) => (
                     <button
                       key={color}
                       onClick={() => setPenColor(color)}
-                      className={`w-6 h-6 rounded-full border-2 transition-all ${
+                      className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 transition-all ${
                         penColor === color ? "border-primary scale-110" : "border-border"
                       }`}
                       style={{ backgroundColor: color }}
@@ -211,23 +227,27 @@ const StudentWorkspace = () => {
                   ))}
                 </div>
 
-                <div className="w-px h-6 bg-border" />
+                {!isMobile && (
+                  <>
+                    <div className="w-px h-6 bg-border" />
 
-                {/* Pen Thickness */}
-                <div className="flex items-center gap-2 w-32">
-                  <span className="text-xs text-muted-foreground">Thickness</span>
-                  <Slider
-                    value={[penThickness]}
-                    onValueChange={(val) => setPenThickness(val[0])}
-                    min={1}
-                    max={5}
-                    step={1}
-                    className="w-20"
-                  />
-                </div>
+                    {/* Pen Thickness */}
+                    <div className="flex items-center gap-2 w-32">
+                      <span className="text-xs text-muted-foreground">Thickness</span>
+                      <Slider
+                        value={[penThickness]}
+                        onValueChange={(val) => setPenThickness(val[0])}
+                        min={1}
+                        max={5}
+                        step={1}
+                        className="w-20"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                 {/* Speech to Text Button */}
                 {speechToTextEnabled && (
                   <Button 
@@ -238,33 +258,46 @@ const StudentWorkspace = () => {
                   >
                     {isRecording ? (
                       <>
-                        <MicOff className="w-4 h-4 mr-1" />
-                        Stop Recording
+                        <MicOff className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                        <span className="hidden sm:inline">Stop</span>
                       </>
                     ) : (
                       <>
-                        <Mic className="w-4 h-4 mr-1" />
-                        Dictate
+                        <Mic className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                        <span className="hidden sm:inline">Dictate</span>
                       </>
                     )}
                   </Button>
                 )}
                 
-                <div className="w-px h-6 bg-border" />
+                {!isMobile && <div className="w-px h-6 bg-border" />}
                 
-                <Button variant="ghost" size="sm" className="hover:bg-muted">
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add Page
-                </Button>
+                {!isMobile && (
+                  <Button variant="ghost" size="sm" className="hover:bg-muted">
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Page
+                  </Button>
+                )}
+                
+                {isMobile && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShowSidebar(!showSidebar)}
+                    className="hover:bg-muted"
+                  >
+                    Pages ({currentPage}/{totalPages})
+                  </Button>
+                )}
               </div>
             </div>
           </Card>
 
-          {/* Massive Writing Canvas */}
+          {/* Massive Writing Canvas - HANDWRITING ONLY */}
           <Card className="flex-1 shadow-card overflow-hidden relative transition-all duration-500">
             {/* Focus Mode Indicator */}
             {focusMode && (
-              <div className="absolute top-4 right-4 z-10 bg-primary/90 text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold shadow-lg animate-fade-in">
+              <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 bg-primary/90 text-primary-foreground px-2 py-1 sm:px-3 rounded-full text-xs font-semibold shadow-lg animate-fade-in">
                 Focus Mode
               </div>
             )}
@@ -279,9 +312,9 @@ const StudentWorkspace = () => {
             
             <div className="h-full flex flex-col relative z-10">
               {/* Paper Header */}
-              <div className="p-4 border-b border-border bg-card">
-                <div className="flex items-center justify-between">
-                  <p className="font-handwriting text-sm text-muted-foreground">
+              <div className="p-2 sm:p-4 border-b border-border bg-card">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <p className="font-handwriting text-xs sm:text-sm text-muted-foreground">
                     Emma Rodriguez • Grade 5 • Page {currentPage} of {totalPages}
                   </p>
                   <div className="flex items-center gap-2">
@@ -299,36 +332,65 @@ const StudentWorkspace = () => {
                 </div>
               </div>
 
-              {/* Lined Paper Writing Area - Takes up most space */}
-              <div className="flex-1 lined-paper bg-white p-8 overflow-y-auto">
+              {/* Lined Paper Writing Area - HANDWRITING CANVAS (simulated with textarea for now) */}
+              <div className="flex-1 lined-paper bg-white p-4 sm:p-8 overflow-y-auto touch-none">
                 <Textarea
                   value={handwrittenText}
                   onChange={(e) => setHandwrittenText(e.target.value)}
                   onFocus={handleTextareaFocus}
-                  className="w-full h-full min-h-[600px] font-handwriting text-xl leading-10 bg-transparent border-none focus-visible:ring-0 resize-none"
-                  placeholder="Start writing here... (Click to enable focus mode)"
-                  style={{ lineHeight: '40px' }}
+                  className="w-full h-full min-h-[400px] sm:min-h-[600px] font-handwriting text-lg sm:text-xl leading-8 sm:leading-10 bg-transparent border-none focus-visible:ring-0 resize-none touch-none"
+                  placeholder="✍️ Write with your finger or stylus here..."
+                  style={{ lineHeight: isMobile ? '32px' : '40px' }}
                 />
               </div>
             </div>
           </Card>
 
+          {/* Comment to Teacher - Separate Typed Section */}
+          {!focusMode && (
+            <Card className="p-3 sm:p-4 bg-muted/30">
+              <div className="flex items-center gap-2 mb-2">
+                <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold text-foreground">Optional: Comment to Teacher</h3>
+              </div>
+              <Textarea
+                value={teacherComment}
+                onChange={(e) => setTeacherComment(e.target.value)}
+                className="w-full min-h-[80px] text-sm bg-background"
+                placeholder="Type any questions or notes for your teacher here..."
+              />
+            </Card>
+          )}
+
           {/* Submit Button */}
           <div className="flex justify-center">
             <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-success to-success/80 hover:opacity-90 shadow-lg px-8"
+              size={isMobile ? "default" : "lg"}
+              className="bg-gradient-to-r from-success to-success/80 hover:opacity-90 shadow-lg px-6 sm:px-8 w-full sm:w-auto"
               onClick={handleSubmit}
             >
-              <Send className="w-5 h-5 mr-2" />
+              <Send className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Submit for Analysis
             </Button>
           </div>
         </div>
 
-        {/* Right Sidebar - Page Thumbnails (20% width) */}
-        <div className={`w-64 border-l border-border bg-card/30 p-4 overflow-y-auto transition-all duration-300 ${focusMode ? 'opacity-30 blur-sm' : 'opacity-100'}`}>
-          <h3 className="text-sm font-semibold mb-3 text-muted-foreground">Pages</h3>
+        {/* Right Sidebar - Page Thumbnails (Desktop) or Modal (Mobile) */}
+        {(!isMobile || showSidebar) && (
+          <div className={`${
+            isMobile 
+              ? 'fixed inset-0 z-50 bg-background/95 backdrop-blur-sm p-4' 
+              : 'w-64 border-l border-border bg-card/30 p-4'
+          } overflow-y-auto transition-all duration-300 ${focusMode ? 'opacity-30 blur-sm' : 'opacity-100'}`}>
+            {isMobile && (
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-foreground">Pages</h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowSidebar(false)}>
+                  Close
+                </Button>
+              </div>
+            )}
+            {!isMobile && <h3 className="text-sm font-semibold mb-3 text-muted-foreground">Pages</h3>}
           <div className="space-y-3">
             {[1, 2].map((page) => (
               <Card 
@@ -361,16 +423,18 @@ const StudentWorkspace = () => {
             </Button>
           </div>
 
-          {/* Instructions Card */}
-          <Card className="p-3 bg-accent/10 border-accent/30 mt-4">
+          {/* Instructions Card - Desktop Only */}
+          {!isMobile && (
+            <Card className="p-3 bg-accent/10 border-accent/30 mt-4">
             <h4 className="text-xs font-semibold text-accent-foreground mb-2">Instructions</h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Write 5-7 sentences about your weekend. Include:
-              <br />• Topic sentence
-              <br />• Descriptive words
-              <br />• Conclusion
-            </p>
-          </Card>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Write 5-7 sentences about your weekend. Include:
+                <br />• Topic sentence
+                <br />• Descriptive words
+                <br />• Conclusion
+              </p>
+            </Card>
+          )}
 
           {/* Accommodation Info */}
           {speechToTextEnabled && (
@@ -396,7 +460,8 @@ const StudentWorkspace = () => {
               </p>
             </Card>
           )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
