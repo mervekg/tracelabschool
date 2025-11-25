@@ -140,7 +140,9 @@ const ParentDashboard = () => {
           </p>
           <div className="flex gap-4">
             <Button variant="outline">View Full Schedule</Button>
-            <Button variant="outline">Download Portfolio</Button>
+            <Button variant="outline" onClick={() => window.location.href = '/parent/portfolio'}>
+              View Complete Portfolio
+            </Button>
           </div>
         </Card>
       </div>

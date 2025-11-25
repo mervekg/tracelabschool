@@ -6,10 +6,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import StudentDashboard from "./pages/StudentDashboard";
 import StudentWorkspace from "./pages/StudentWorkspace";
+import StudentAnalysis from "./pages/StudentAnalysis";
 import StudentFeedback from "./pages/StudentFeedback";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import TeacherReview from "./pages/TeacherReview";
+import RubricBuilder from "./pages/RubricBuilder";
 import ParentDashboard from "./pages/ParentDashboard";
+import ParentPortfolio from "./pages/ParentPortfolio";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -25,10 +28,13 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/student" element={<StudentDashboard />} />
           <Route path="/student/workspace" element={<StudentWorkspace />} />
+          <Route path="/student/analysis" element={<StudentAnalysis />} />
           <Route path="/student/feedback" element={<StudentFeedback />} />
           <Route path="/teacher" element={<TeacherDashboard />} />
           <Route path="/teacher/review" element={<TeacherReview />} />
+          <Route path="/teacher/rubric-builder" element={<RubricBuilder />} />
           <Route path="/parent" element={<ParentDashboard />} />
+          <Route path="/parent/portfolio" element={<ParentPortfolio />} />
           <Route path="/admin" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

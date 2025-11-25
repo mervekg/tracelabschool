@@ -124,24 +124,48 @@ const StudentFeedback = () => {
           </div>
         </Card>
 
-        {/* Your Submitted Work */}
+        {/* Before & After Comparison */}
         <Card className="p-6 shadow-card">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-semibold">Your Submitted Work</h2>
-            <Button variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              Download
-            </Button>
+          <h2 className="text-2xl font-semibold mb-4">Before & After Comparison</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Original Version */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="outline">Original</Badge>
+              </div>
+              <div className="lined-paper bg-white p-6 rounded-xl border border-border min-h-[300px]">
+                <p className="font-handwriting text-base leading-8">
+                  <span className="bg-warning/20">Once upon a time, there was a curious student named Emma who loved to explore.</span>{" "}
+                  This weekend was extra special because I went to the science museum with my family. 
+                  I saw enormous dinosaur skeletons and sparkling gemstones. My favorite part was the 
+                  planetarium show about outer space. We also had lunch at a delicious Italian restaurant. 
+                  After that, I spent Sunday afternoon reading my new book in the park. It was a wonderful 
+                  weekend full of learning and fun!
+                </p>
+              </div>
+            </div>
+
+            {/* Revised Version (If Available) */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Badge className="bg-success text-success-foreground">Suggested Revision</Badge>
+              </div>
+              <div className="lined-paper bg-white p-6 rounded-xl border border-success min-h-[300px]">
+                <p className="font-handwriting text-base leading-8">
+                  <span className="bg-success/20">My weekend was filled with exciting adventures at the science museum.</span>{" "}
+                  On Saturday morning, my family and I explored enormous dinosaur skeletons and sparkling gemstones. 
+                  My favorite part was the planetarium show about outer space. Afterward, we had lunch at a delicious 
+                  Italian restaurant. During Sunday afternoon, I spent time reading my new book in the peaceful park. 
+                  It was a wonderful weekend full of learning and fun!
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="lined-paper bg-white p-6 rounded-xl border border-border min-h-[300px]">
-            <p className="font-handwriting text-lg leading-8">
-              Once upon a time, there was a curious student named Emma who loved to explore. 
-              This weekend was extra special because I went to the science museum with my family. 
-              I saw enormous dinosaur skeletons and sparkling gemstones. My favorite part was the 
-              planetarium show about outer space. We also had lunch at a delicious Italian restaurant. 
-              After that, I spent Sunday afternoon reading my new book in the park. It was a wonderful 
-              weekend full of learning and fun!
-            </p>
+          <div className="mt-4">
+            <Button variant="outline">
+              <Download className="w-4 h-4 mr-2" />
+              Download Both Versions
+            </Button>
           </div>
         </Card>
 

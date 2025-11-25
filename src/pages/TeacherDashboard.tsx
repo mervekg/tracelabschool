@@ -35,6 +35,42 @@ const TeacherDashboard = () => {
           </Button>
         </div>
 
+        {/* Quick Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="p-4 bg-gradient-to-br from-warning/10 to-warning/5 border-warning/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Submissions to Review</p>
+                <p className="text-3xl font-bold text-warning-foreground">{classStats.pendingReviews}</p>
+                <p className="text-xs text-muted-foreground mt-1">2 urgent</p>
+              </div>
+              <FileCheck className="w-10 h-10 text-warning-foreground opacity-20" />
+            </div>
+          </Card>
+
+          <Card className="p-4 bg-gradient-to-br from-accent/10 to-accent/5 border-accent/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Needs Revision</p>
+                <p className="text-3xl font-bold text-accent-foreground">3</p>
+                <p className="text-xs text-muted-foreground mt-1">Awaiting resubmit</p>
+              </div>
+              <AlertCircle className="w-10 h-10 text-accent-foreground opacity-20" />
+            </div>
+          </Card>
+
+          <Card className="p-4 bg-gradient-to-br from-success/10 to-success/5 border-success/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Class Writing Growth</p>
+                <p className="text-3xl font-bold text-success">+15%</p>
+                <p className="text-xs text-muted-foreground mt-1">Past 30 days</p>
+              </div>
+              <TrendingUp className="w-10 h-10 text-success opacity-20" />
+            </div>
+          </Card>
+        </div>
+
         {/* Class Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="p-6 paper-texture shadow-paper hover:shadow-card transition-all">
