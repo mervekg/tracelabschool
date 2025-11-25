@@ -27,14 +27,32 @@ const StudentDashboard = () => {
             <h1 className="text-4xl font-bold text-primary mb-2">Welcome back, Emma!</h1>
             <p className="text-muted-foreground">Let's continue your learning journey</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Award className="w-6 h-6 text-warning" />
-            <div className="text-right">
-              <p className="text-2xl font-bold text-primary">12</p>
-              <p className="text-xs text-muted-foreground">Day Streak</p>
-            </div>
+          <div className="flex items-center gap-4">
+            <Card className="p-3 bg-gradient-to-br from-warning/20 to-warning/10 border-warning/30">
+              <div className="flex items-center gap-2">
+                <Award className="w-6 h-6 text-warning-foreground" />
+                <div>
+                  <p className="text-2xl font-bold text-warning-foreground">12</p>
+                  <p className="text-xs text-muted-foreground">Day Writing Streak 🔥</p>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
+
+        {/* Feedback Notifications */}
+        <Card className="p-4 bg-gradient-to-r from-accent/10 to-primary/10 border-accent/30">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <MessageSquare className="w-6 h-6 text-accent-foreground" />
+              <div>
+                <p className="font-semibold text-accent-foreground">New Feedback Waiting for You!</p>
+                <p className="text-sm text-muted-foreground">Your teacher reviewed "Paragraph Writing" and "Fraction Problems"</p>
+              </div>
+            </div>
+            <Button onClick={() => navigate('/student/feedback')}>View Now</Button>
+          </div>
+        </Card>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -150,12 +168,11 @@ const StudentDashboard = () => {
           <h2 className="text-2xl font-semibold mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Button
-              variant="outline"
-              className="h-auto flex-col gap-2 p-6 hover:bg-primary/5 hover:border-primary transition-all"
+              className="h-auto flex-col gap-3 p-8 bg-gradient-to-br from-primary to-primary/80 hover:opacity-90 transition-all shadow-lg"
               onClick={() => navigate('/student/workspace')}
             >
-              <FileText className="w-8 h-8 text-primary" />
-              <span className="text-sm font-medium">Start Writing</span>
+              <FileText className="w-10 h-10 text-primary-foreground" />
+              <span className="text-base font-semibold text-primary-foreground">Start Assignment</span>
             </Button>
             <Button
               variant="outline"

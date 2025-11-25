@@ -148,6 +148,11 @@ All colors MUST be HSL.
       linear-gradient(90deg, hsl(var(--paper-line) / 0.3) 1px, transparent 1px);
     background-size: 20px 20px;
   }
+
+  /* Handwriting font class */
+  .font-handwriting {
+    font-family: 'Kalam', cursive;
+  }
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Kalam:wght@300;400;700&display=swap');
