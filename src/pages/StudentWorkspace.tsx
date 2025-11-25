@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Undo2, Redo2, Save, Send, Plus, Timer, Palette, PenTool, Eraser, FileImage } from "lucide-react";
+import { useState, useRef } from "react";
+import { Undo2, Redo2, Save, Send, Plus, Timer, Palette, PenTool, Eraser, Mic, MicOff, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 
 const StudentWorkspace = () => {
   const navigate = useNavigate();
@@ -16,6 +17,11 @@ const StudentWorkspace = () => {
   const [penThickness, setPenThickness] = useState(2);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [focusMode, setFocusMode] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [speechToTextEnabled, setSpeechToTextEnabled] = useState(true); // Set by school accommodation
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const handleSubmit = () => {
     toast.success("Submitting for AI analysis...");
@@ -24,18 +30,103 @@ const StudentWorkspace = () => {
     }, 1500);
   };
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await transcribeAudio(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      toast.info("Recording... Speak clearly");
+    } catch (error) {
+      toast.error("Could not access microphone");
+      console.error(error);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      toast.info("Processing your speech...");
+    }
+  };
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      reader.onloadend = async () => {
+        const base64Audio = reader.result?.toString().split(',')[1];
+        
+        // Note: In production, this would call the Supabase edge function
+        // Example: supabase.functions.invoke('speech-to-text', { body: { audio: base64Audio }})
+        // For demo, we'll simulate the response
+        
+        // Simulated transcription for demo purposes
+        setTimeout(() => {
+          const simulatedText = "This is a sample transcribed text from speech.";
+          setHandwrittenText(prev => prev + " " + simulatedText);
+          toast.success("Text added from speech!");
+        }, 1500);
+        
+        /* Production implementation:
+        const response = await fetch('/functions/v1/speech-to-text', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseAnonKey}`
+          },
+          body: JSON.stringify({ audio: base64Audio })
+        });
+
+        if (response.ok) {
+          const { text } = await response.json();
+          setHandwrittenText(prev => prev + " " + text);
+          toast.success("Text added from speech!");
+        } else {
+          toast.error("Transcription failed. Please try again.");
+        }
+        */
+      };
+    } catch (error) {
+      toast.error("Failed to process audio");
+      console.error(error);
+    }
+  };
+
   const colors = ["#000000", "#2563eb", "#dc2626", "#16a34a", "#9333ea"];
 
   return (
     <div className="min-h-screen paper-texture">
       {/* Top Header */}
-      <div className="border-b border-border bg-card/50 backdrop-blur p-4">
+      <div className={`border-b border-border bg-card/50 backdrop-blur p-4 transition-all duration-300 ${focusMode ? 'opacity-30 blur-sm' : 'opacity-100'}`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-primary">Paragraph Writing: My Weekend</h1>
             <p className="text-sm text-muted-foreground">ELA • Due Tomorrow</p>
           </div>
           <div className="flex items-center gap-3">
+            {speechToTextEnabled && (
+              <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-accent/10 border border-accent/30">
+                <Volume2 className="w-4 h-4 text-accent-foreground" />
+                <span className="text-xs text-accent-foreground">Speech-to-Text ON</span>
+              </div>
+            )}
             <Badge variant="secondary" className="flex items-center gap-1 px-3 py-1">
               <Timer className="w-4 h-4" />
               {writingTime} min
@@ -52,7 +143,7 @@ const StudentWorkspace = () => {
         {/* Main Writing Canvas - 80% width */}
         <div className="flex-1 flex flex-col p-6 gap-4">
           {/* Enhanced Toolbar */}
-          <Card className="p-3 shadow-paper">
+          <Card className={`p-3 shadow-paper transition-all duration-300 ${focusMode ? 'opacity-30 blur-sm' : 'opacity-100'}`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 {/* Undo/Redo */}
@@ -110,7 +201,31 @@ const StudentWorkspace = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
+                {/* Speech to Text Button */}
+                {speechToTextEnabled && (
+                  <Button 
+                    variant={isRecording ? "destructive" : "outline"}
+                    size="sm"
+                    onClick={isRecording ? stopRecording : startRecording}
+                    className={isRecording ? "animate-pulse" : ""}
+                  >
+                    {isRecording ? (
+                      <>
+                        <MicOff className="w-4 h-4 mr-1" />
+                        Stop Recording
+                      </>
+                    ) : (
+                      <>
+                        <Mic className="w-4 h-4 mr-1" />
+                        Dictate
+                      </>
+                    )}
+                  </Button>
+                )}
+                
+                <div className="w-px h-6 bg-border" />
+                
                 <Button variant="ghost" size="sm" className="hover:bg-muted">
                   <Plus className="w-4 h-4 mr-1" />
                   Add Page
@@ -120,13 +235,29 @@ const StudentWorkspace = () => {
           </Card>
 
           {/* Massive Writing Canvas */}
-          <Card className="flex-1 shadow-card overflow-hidden">
+          <Card className="flex-1 shadow-card overflow-hidden relative">
+            {/* Focus Mode Indicator */}
+            {focusMode && (
+              <div className="absolute top-4 right-4 z-10 bg-primary/90 text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+                Focus Mode
+              </div>
+            )}
+            
             <div className="h-full flex flex-col">
               {/* Paper Header */}
               <div className="p-4 border-b border-border bg-card">
-                <p className="font-handwriting text-sm text-muted-foreground">
-                  Emma Rodriguez • Grade 5 • Page {currentPage} of {totalPages}
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="font-handwriting text-sm text-muted-foreground">
+                    Emma Rodriguez • Grade 5 • Page {currentPage} of {totalPages}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">Focus Mode</span>
+                    <Switch
+                      checked={focusMode}
+                      onCheckedChange={setFocusMode}
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Lined Paper Writing Area - Takes up most space */}
@@ -134,8 +265,9 @@ const StudentWorkspace = () => {
                 <Textarea
                   value={handwrittenText}
                   onChange={(e) => setHandwrittenText(e.target.value)}
+                  onFocus={() => setFocusMode(true)}
                   className="w-full h-full min-h-[600px] font-handwriting text-xl leading-10 bg-transparent border-none focus-visible:ring-0 resize-none"
-                  placeholder="Start writing here..."
+                  placeholder="Start writing here... (Click to enable focus mode)"
                   style={{ lineHeight: '40px' }}
                 />
               </div>
@@ -156,7 +288,7 @@ const StudentWorkspace = () => {
         </div>
 
         {/* Right Sidebar - Page Thumbnails (20% width) */}
-        <div className="w-64 border-l border-border bg-card/30 p-4 overflow-y-auto">
+        <div className={`w-64 border-l border-border bg-card/30 p-4 overflow-y-auto transition-all duration-300 ${focusMode ? 'opacity-30 blur-sm' : 'opacity-100'}`}>
           <h3 className="text-sm font-semibold mb-3 text-muted-foreground">Pages</h3>
           <div className="space-y-3">
             {[1, 2].map((page) => (
@@ -200,6 +332,19 @@ const StudentWorkspace = () => {
               <br />• Conclusion
             </p>
           </Card>
+
+          {/* Accommodation Info */}
+          {speechToTextEnabled && (
+            <Card className="p-3 bg-success/10 border-success/30 mt-4">
+              <h4 className="text-xs font-semibold text-success mb-2 flex items-center gap-1">
+                <Mic className="w-3 h-3" />
+                Speech-to-Text Active
+              </h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Click the "Dictate" button to speak your writing. Approved accommodation by school.
+              </p>
+            </Card>
+          )}
         </div>
       </div>
     </div>
