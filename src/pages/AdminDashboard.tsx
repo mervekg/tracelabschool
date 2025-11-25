@@ -2,8 +2,10 @@ import { Users, TrendingUp, Shield, BookOpen, BarChart3, AlertTriangle } from "l
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const schoolStats = {
     totalStudents: 486,
     totalTeachers: 28,
@@ -190,6 +192,10 @@ const AdminDashboard = () => {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Button variant="outline" className="h-auto flex-col gap-2 p-6" onClick={() => navigate('/admin/accommodation-approvals')}>
+            <Users className="w-8 h-8 text-primary" />
+            <span className="text-sm font-medium">Accommodation Approvals</span>
+          </Button>
           <Button variant="outline" className="h-auto flex-col gap-2 p-6">
             <Users className="w-8 h-8 text-primary" />
             <span className="text-sm font-medium">Manage Users</span>

@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Undo2, Redo2, Save, Send, Plus, Timer, Palette, PenTool, Eraser, Mic, MicOff, Volume2 } from "lucide-react";
+import { Undo2, Redo2, Save, Send, Plus, Timer, Palette, PenTool, Eraser, Mic, MicOff, Volume2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +20,7 @@ const StudentWorkspace = () => {
   const [focusMode, setFocusMode] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [speechToTextEnabled, setSpeechToTextEnabled] = useState(true); // Set by school accommodation
+  const [focusModeAutoOn, setFocusModeAutoOn] = useState(true); // Set by accommodation
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
@@ -111,8 +112,33 @@ const StudentWorkspace = () => {
 
   const colors = ["#000000", "#2563eb", "#dc2626", "#16a34a", "#9333ea"];
 
+  // Auto-activate focus mode if accommodation is set
+  const handleTextareaFocus = () => {
+    if (focusModeAutoOn) {
+      setFocusMode(true);
+      toast.info("Focus Mode activated", { duration: 2000 });
+    }
+  };
+
   return (
     <div className="min-h-screen paper-texture">
+      {/* Focus Mode Overlay Animation */}
+      {focusMode && (
+        <>
+          {/* Breathing glow animation */}
+          <div className="fixed inset-0 pointer-events-none z-40">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-pulse" 
+                 style={{ animationDuration: '3s' }} />
+          </div>
+          
+          {/* Tooltip */}
+          <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
+            <Card className="p-3 bg-primary text-primary-foreground shadow-lg border-primary">
+              <p className="text-sm font-medium">✨ You are now in Focus Mode. Let your thinking flow.</p>
+            </Card>
+          </div>
+        </>
+      )}
       {/* Top Header */}
       <div className={`border-b border-border bg-card/50 backdrop-blur p-4 transition-all duration-300 ${focusMode ? 'opacity-30 blur-sm' : 'opacity-100'}`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -235,15 +261,23 @@ const StudentWorkspace = () => {
           </Card>
 
           {/* Massive Writing Canvas */}
-          <Card className="flex-1 shadow-card overflow-hidden relative">
+          <Card className="flex-1 shadow-card overflow-hidden relative transition-all duration-500">
             {/* Focus Mode Indicator */}
             {focusMode && (
-              <div className="absolute top-4 right-4 z-10 bg-primary/90 text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+              <div className="absolute top-4 right-4 z-10 bg-primary/90 text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold shadow-lg animate-fade-in">
                 Focus Mode
               </div>
             )}
             
-            <div className="h-full flex flex-col">
+            {/* Focus ring animation */}
+            {focusMode && (
+              <div className="absolute inset-0 pointer-events-none z-0">
+                <div className="absolute inset-0 rounded-lg ring-2 ring-primary/30 animate-pulse" 
+                     style={{ animationDuration: '2s' }} />
+              </div>
+            )}
+            
+            <div className="h-full flex flex-col relative z-10">
               {/* Paper Header */}
               <div className="p-4 border-b border-border bg-card">
                 <div className="flex items-center justify-between">
@@ -254,7 +288,12 @@ const StudentWorkspace = () => {
                     <span className="text-xs text-muted-foreground">Focus Mode</span>
                     <Switch
                       checked={focusMode}
-                      onCheckedChange={setFocusMode}
+                      onCheckedChange={(checked) => {
+                        setFocusMode(checked);
+                        if (!checked) {
+                          toast.info("Focus Mode paused", { duration: 2000 });
+                        }
+                      }}
                     />
                   </div>
                 </div>
@@ -265,7 +304,7 @@ const StudentWorkspace = () => {
                 <Textarea
                   value={handwrittenText}
                   onChange={(e) => setHandwrittenText(e.target.value)}
-                  onFocus={() => setFocusMode(true)}
+                  onFocus={handleTextareaFocus}
                   className="w-full h-full min-h-[600px] font-handwriting text-xl leading-10 bg-transparent border-none focus-visible:ring-0 resize-none"
                   placeholder="Start writing here... (Click to enable focus mode)"
                   style={{ lineHeight: '40px' }}
@@ -335,13 +374,25 @@ const StudentWorkspace = () => {
 
           {/* Accommodation Info */}
           {speechToTextEnabled && (
-            <Card className="p-3 bg-success/10 border-success/30 mt-4">
+            <Card className="p-3 bg-success/10 border-success/30 mt-4 animate-fade-in">
               <h4 className="text-xs font-semibold text-success mb-2 flex items-center gap-1">
                 <Mic className="w-3 h-3" />
                 Speech-to-Text Active
               </h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Click the "Dictate" button to speak your writing. Approved accommodation by school.
+              </p>
+            </Card>
+          )}
+
+          {focusModeAutoOn && (
+            <Card className="p-3 bg-primary/10 border-primary/30 mt-4 animate-fade-in">
+              <h4 className="text-xs font-semibold text-primary mb-2 flex items-center gap-1">
+                <Zap className="w-3 h-3" />
+                Focus Mode Auto-On
+              </h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Focus mode will automatically activate when you start writing.
               </p>
             </Card>
           )}
