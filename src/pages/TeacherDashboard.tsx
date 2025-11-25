@@ -29,10 +29,18 @@ const TeacherDashboard = () => {
             <h1 className="text-4xl font-bold text-primary mb-2">Teacher Dashboard</h1>
             <p className="text-muted-foreground">Grade 5 - Section A</p>
           </div>
-          <Button className="bg-gradient-to-r from-primary to-primary/80">
-            <Calendar className="w-4 h-4 mr-2" />
-            Today's Schedule
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => navigate('/teacher/accommodations')}
+            >
+              Accommodations
+            </Button>
+            <Button className="bg-gradient-to-r from-primary to-primary/80">
+              <Calendar className="w-4 h-4 mr-2" />
+              Today's Schedule
+            </Button>
+          </div>
         </div>
 
         {/* Quick Summary Cards */}

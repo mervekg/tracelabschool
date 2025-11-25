@@ -1,4 +1,4 @@
-import { BookOpen, FileText, MessageSquare, TrendingUp, Award, Clock } from "lucide-react";
+import { BookOpen, FileText, MessageSquare, TrendingUp, Award, Clock, Mic, Zap } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -196,6 +196,84 @@ const StudentDashboard = () => {
               <TrendingUp className="w-8 h-8 text-warning-foreground" />
               <span className="text-sm font-medium">My Progress</span>
             </Button>
+          </div>
+        </Card>
+
+        {/* Active Accommodations Section */}
+        <Card className="p-6 paper-texture shadow-card">
+          <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+            <Award className="w-6 h-6 text-primary" />
+            My Active Accommodations
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Speech-to-Text */}
+            <Card className="p-4 bg-gradient-to-br from-accent/10 to-accent/5 border-accent/30 hover:shadow-paper transition-all">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-accent/20">
+                  <Mic className="w-5 h-5 text-accent-foreground" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Speech-to-Text</h3>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Use your voice to dictate your writing
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-xs">Active - This Semester</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Approved by: Admin Wilson
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Extended Time */}
+            <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30 hover:shadow-paper transition-all">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-primary/20">
+                  <Clock className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Extended Time</h3>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    50% additional time on assignments
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-xs">Active - School Year</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Approved by: Admin Wilson
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Focus Mode */}
+            <Card className="p-4 bg-gradient-to-br from-success/10 to-success/5 border-success/30 hover:shadow-paper transition-all">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-success/20">
+                  <Zap className="w-5 h-5 text-success" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Focus Mode Auto-On</h3>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Automatic distraction-free workspace
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-xs">Active - School Year</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Approved by: Ms. Johnson
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
+          
+          <div className="mt-4 p-4 rounded-xl bg-muted/30 border border-border">
+            <p className="text-sm text-muted-foreground">
+              💡 <strong>Need help?</strong> Talk to your teacher if you have questions about your accommodations.
+            </p>
           </div>
         </Card>
       </div>
