@@ -1,10 +1,32 @@
-import { GraduationCap, Users, Heart, Settings } from "lucide-react";
+import { useState, useEffect } from "react";
+import { GraduationCap, Users, Heart, Settings, LogOut, LogIn } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    // Check current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+  };
 
   const roles = [
     {
@@ -40,8 +62,28 @@ const Index = () => {
   return (
     <div className="min-h-screen paper-texture flex items-center justify-center p-6">
       <div className="max-w-6xl w-full space-y-12">
+        {/* Auth Button */}
+        <div className="flex justify-end">
+          {user ? (
+            <Button variant="outline" onClick={handleSignOut} className="gap-2">
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </Button>
+          ) : (
+            <Button onClick={() => navigate("/auth")} className="gap-2">
+              <LogIn className="w-4 h-4" />
+              Sign In
+            </Button>
+          )}
+        </div>
+
         {/* Hero Section */}
         <div className="text-center space-y-4">
+          {user && (
+            <p className="text-sm text-muted-foreground">
+              Welcome back, {user.email}
+            </p>
+          )}
           <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
             Solvia
           </h1>
