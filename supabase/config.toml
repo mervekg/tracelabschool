@@ -1,0 +1,5 @@
+[functions.speech-to-text]
+verify_jwt = false
+
+[functions.handwriting-recognition]
+verify_jwt = false
