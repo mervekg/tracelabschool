@@ -38,6 +38,14 @@ const TeacherDashboard = () => {
             </Button>
             <Button 
               variant="outline"
+              onClick={() => navigate('/teacher/violation-reports')}
+              className="border-destructive/50 hover:bg-destructive/10"
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              Violations
+            </Button>
+            <Button 
+              variant="outline"
               onClick={() => navigate('/teacher/assignment-settings')}
               className="border-destructive/50 hover:bg-destructive/10"
             >
@@ -52,7 +60,7 @@ const TeacherDashboard = () => {
         </div>
 
         {/* Quick Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="p-4 bg-gradient-to-br from-warning/10 to-warning/5 border-warning/30">
             <div className="flex items-center justify-between">
               <div>
@@ -83,6 +91,20 @@ const TeacherDashboard = () => {
                 <p className="text-xs text-muted-foreground mt-1">Past 30 days</p>
               </div>
               <TrendingUp className="w-10 h-10 text-success opacity-20" />
+            </div>
+          </Card>
+
+          <Card 
+            className="p-4 bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/30 cursor-pointer hover:shadow-md transition-all"
+            onClick={() => navigate('/teacher/violation-reports')}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Lockdown Violations</p>
+                <p className="text-3xl font-bold text-destructive">7</p>
+                <p className="text-xs text-muted-foreground mt-1">3 students flagged</p>
+              </div>
+              <Shield className="w-10 h-10 text-destructive opacity-20" />
             </div>
           </Card>
         </div>
