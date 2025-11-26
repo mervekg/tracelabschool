@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Undo2, Redo2, Save, Send, Plus, Timer, Palette, PenTool, Eraser, Mic, MicOff, Volume2, Zap, MessageSquare } from "lucide-react";
+import { Undo2, Redo2, Save, Send, Plus, Timer, Palette, PenTool, Eraser, Mic, MicOff, Volume2, Zap, MessageSquare, ScanText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,8 +25,11 @@ const StudentWorkspace = () => {
   const [focusModeAutoOn, setFocusModeAutoOn] = useState(true); // Set by accommodation
   const [teacherComment, setTeacherComment] = useState("");
   const [showSidebar, setShowSidebar] = useState(!isMobile);
+  const [recognizedText, setRecognizedText] = useState("");
+  const [isRecognizing, setIsRecognizing] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const canvasRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = () => {
     toast.success("Submitting for AI analysis...");
@@ -111,6 +114,59 @@ const StudentWorkspace = () => {
     } catch (error) {
       toast.error("Failed to process audio");
       console.error(error);
+    }
+  };
+
+  const recognizeHandwriting = async () => {
+    try {
+      setIsRecognizing(true);
+      toast.info("Analyzing handwriting...");
+
+      // In a real implementation, we would capture the canvas as an image
+      // For now, we'll simulate by creating a data URL from the textarea content
+      // This is a placeholder - in production, you'd use an actual canvas element
+      
+      // Simulated handwriting recognition for demo
+      setTimeout(() => {
+        const simulatedRecognition = handwrittenText;
+        setRecognizedText(simulatedRecognition);
+        toast.success("Handwriting converted to text!");
+        setIsRecognizing(false);
+      }, 2000);
+
+      /* Production implementation with actual canvas:
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        toast.error("Canvas not found");
+        return;
+      }
+
+      // Convert canvas to base64 image
+      const imageData = canvas.toDataURL('image/png');
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/handwriting-recognition`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+        },
+        body: JSON.stringify({ image: imageData })
+      });
+
+      if (response.ok) {
+        const { text } = await response.json();
+        setRecognizedText(text);
+        toast.success("Handwriting converted to text!");
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Recognition failed. Please try again.");
+      }
+      setIsRecognizing(false);
+      */
+    } catch (error) {
+      toast.error("Failed to recognize handwriting");
+      console.error(error);
+      setIsRecognizing(false);
     }
   };
 
@@ -270,6 +326,20 @@ const StudentWorkspace = () => {
                   </Button>
                 )}
                 
+                {/* Handwriting Recognition Button */}
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  onClick={recognizeHandwriting}
+                  disabled={isRecognizing}
+                  className={isRecognizing ? "animate-pulse" : ""}
+                >
+                  <ScanText className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                  <span className="hidden sm:inline">
+                    {isRecognizing ? "Analyzing..." : "Convert"}
+                  </span>
+                </Button>
+                
                 {!isMobile && <div className="w-px h-6 bg-border" />}
                 
                 {!isMobile && (
@@ -335,6 +405,7 @@ const StudentWorkspace = () => {
               {/* Lined Paper Writing Area - HANDWRITING CANVAS (simulated with textarea for now) */}
               <div className="flex-1 lined-paper bg-white p-4 sm:p-8 overflow-y-auto touch-none">
                 <Textarea
+                  ref={canvasRef}
                   value={handwrittenText}
                   onChange={(e) => setHandwrittenText(e.target.value)}
                   onFocus={handleTextareaFocus}
@@ -345,6 +416,31 @@ const StudentWorkspace = () => {
               </div>
             </div>
           </Card>
+
+          {/* Recognized Text Display */}
+          {recognizedText && !focusMode && (
+            <Card className="p-3 sm:p-4 bg-accent/10 border-accent/30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <ScanText className="w-4 h-4 text-accent-foreground" />
+                  <h3 className="text-sm font-semibold text-accent-foreground">Converted Text (For Accessibility)</h3>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(recognizedText);
+                    toast.success("Text copied to clipboard!");
+                  }}
+                >
+                  Copy
+                </Button>
+              </div>
+              <div className="p-3 bg-background rounded-md max-h-[200px] overflow-y-auto">
+                <p className="text-sm text-foreground whitespace-pre-wrap">{recognizedText}</p>
+              </div>
+            </Card>
+          )}
 
           {/* Comment to Teacher - Separate Typed Section */}
           {!focusMode && (
