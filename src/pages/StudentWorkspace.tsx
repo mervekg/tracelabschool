@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Undo2, Redo2, Save, Send, Plus, Timer, Palette, PenTool, Eraser, Mic, MicOff, Volume2, Zap, MessageSquare, ScanText } from "lucide-react";
+import { HandwritingCanvas, HandwritingCanvasRef } from "@/components/HandwritingCanvas";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,9 +15,9 @@ const StudentWorkspace = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [writingTime, setWritingTime] = useState(12);
-  const [handwrittenText, setHandwrittenText] = useState("Once upon a time, there was a curious student named Emma who loved to explore...");
   const [penColor, setPenColor] = useState("#000000");
   const [penThickness, setPenThickness] = useState(2);
+  const [isEraser, setIsEraser] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [focusMode, setFocusMode] = useState(false);
@@ -29,7 +30,7 @@ const StudentWorkspace = () => {
   const [isRecognizing, setIsRecognizing] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const canvasRef = useRef<HTMLTextAreaElement>(null);
+  const canvasRef = useRef<HandwritingCanvasRef>(null);
 
   const handleSubmit = () => {
     toast.success("Submitting for AI analysis...");
@@ -82,29 +83,23 @@ const StudentWorkspace = () => {
         const base64Audio = reader.result?.toString().split(',')[1];
         
         // Note: In production, this would call the Supabase edge function
-        // Example: supabase.functions.invoke('speech-to-text', { body: { audio: base64Audio }})
-        // For demo, we'll simulate the response
-        
-        // Simulated transcription for demo purposes
+        // For demo purposes, showing a sample
         setTimeout(() => {
-          const simulatedText = "This is a sample transcribed text from speech.";
-          setHandwrittenText(prev => prev + " " + simulatedText);
-          toast.success("Text added from speech!");
+          toast.success("Speech-to-text would be added here!");
         }, 1500);
         
         /* Production implementation:
-        const response = await fetch('/functions/v1/speech-to-text', {
+        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/speech-to-text`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabaseAnonKey}`
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
           },
           body: JSON.stringify({ audio: base64Audio })
         });
 
         if (response.ok) {
           const { text } = await response.json();
-          setHandwrittenText(prev => prev + " " + text);
           toast.success("Text added from speech!");
         } else {
           toast.error("Transcription failed. Please try again.");
@@ -122,28 +117,24 @@ const StudentWorkspace = () => {
       setIsRecognizing(true);
       toast.info("Analyzing handwriting...");
 
-      // In a real implementation, we would capture the canvas as an image
-      // For now, we'll simulate by creating a data URL from the textarea content
-      // This is a placeholder - in production, you'd use an actual canvas element
-      
-      // Simulated handwriting recognition for demo
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        toast.error("Canvas not found");
+        setIsRecognizing(false);
+        return;
+      }
+
+      // Get canvas image data
+      const imageData = canvas.getImageData();
+
+      // For demo purposes, simulate recognition
       setTimeout(() => {
-        const simulatedRecognition = handwrittenText;
-        setRecognizedText(simulatedRecognition);
+        setRecognizedText("Once upon a time, there was a curious student named Emma who loved to explore new ideas and discover amazing things in the world of learning.");
         toast.success("Handwriting converted to text!");
         setIsRecognizing(false);
       }, 2000);
 
-      /* Production implementation with actual canvas:
-      const canvas = canvasRef.current;
-      if (!canvas) {
-        toast.error("Canvas not found");
-        return;
-      }
-
-      // Convert canvas to base64 image
-      const imageData = canvas.toDataURL('image/png');
-
+      /* Production implementation:
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/handwriting-recognition`, {
         method: 'POST',
         headers: { 
@@ -172,9 +163,22 @@ const StudentWorkspace = () => {
 
   const colors = ["#000000", "#2563eb", "#dc2626", "#16a34a", "#9333ea"];
 
+  const handleUndo = () => {
+    canvasRef.current?.undo();
+  };
+
+  const handleRedo = () => {
+    canvasRef.current?.redo();
+  };
+
+  const handleClear = () => {
+    canvasRef.current?.clear();
+    toast.success("Canvas cleared!");
+  };
+
   // Auto-activate focus mode if accommodation is set
-  const handleTextareaFocus = () => {
-    if (focusModeAutoOn) {
+  const handleCanvasFocus = () => {
+    if (focusModeAutoOn && !focusMode) {
       setFocusMode(true);
       toast.info("Focus Mode activated", { duration: 2000 });
     }
@@ -246,10 +250,20 @@ const StudentWorkspace = () => {
               <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
                 {/* Undo/Redo */}
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="icon" className="hover:bg-muted h-8 w-8 sm:h-10 sm:w-10">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="hover:bg-muted h-8 w-8 sm:h-10 sm:w-10"
+                    onClick={handleUndo}
+                  >
                     <Undo2 className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="hover:bg-muted h-8 w-8 sm:h-10 sm:w-10">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="hover:bg-muted h-8 w-8 sm:h-10 sm:w-10"
+                    onClick={handleRedo}
+                  >
                     <Redo2 className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                 </div>
@@ -258,11 +272,21 @@ const StudentWorkspace = () => {
 
                 {/* Pen Tool */}
                 <div className="flex items-center gap-1 sm:gap-2">
-                  <Button variant="ghost" size="icon" className="bg-primary/10 hover:bg-primary/20 h-8 w-8 sm:h-10 sm:w-10">
-                    <PenTool className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className={`h-8 w-8 sm:h-10 sm:w-10 ${!isEraser ? 'bg-primary/10 hover:bg-primary/20' : 'hover:bg-muted'}`}
+                    onClick={() => setIsEraser(false)}
+                  >
+                    <PenTool className={`w-3 h-3 sm:w-4 sm:h-4 ${!isEraser ? 'text-primary' : ''}`} />
                   </Button>
-                  <Button variant="ghost" size="icon" className="hover:bg-muted h-8 w-8 sm:h-10 sm:w-10">
-                    <Eraser className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className={`h-8 w-8 sm:h-10 sm:w-10 ${isEraser ? 'bg-destructive/10 hover:bg-destructive/20' : 'hover:bg-muted'}`}
+                    onClick={() => setIsEraser(true)}
+                  >
+                    <Eraser className={`w-3 h-3 sm:w-4 sm:h-4 ${isEraser ? 'text-destructive' : ''}`} />
                   </Button>
                 </div>
 
@@ -343,10 +367,20 @@ const StudentWorkspace = () => {
                 {!isMobile && <div className="w-px h-6 bg-border" />}
                 
                 {!isMobile && (
-                  <Button variant="ghost" size="sm" className="hover:bg-muted">
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Page
-                  </Button>
+                  <>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="hover:bg-muted"
+                      onClick={handleClear}
+                    >
+                      Clear
+                    </Button>
+                    <Button variant="ghost" size="sm" className="hover:bg-muted">
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add Page
+                    </Button>
+                  </>
                 )}
                 
                 {isMobile && (
@@ -402,16 +436,16 @@ const StudentWorkspace = () => {
                 </div>
               </div>
 
-              {/* Lined Paper Writing Area - HANDWRITING CANVAS (simulated with textarea for now) */}
-              <div className="flex-1 lined-paper bg-white p-4 sm:p-8 overflow-y-auto touch-none">
-                <Textarea
+              {/* Real Handwriting Canvas with Touch Support */}
+              <div 
+                className="flex-1 bg-white overflow-hidden"
+                onClick={handleCanvasFocus}
+              >
+                <HandwritingCanvas
                   ref={canvasRef}
-                  value={handwrittenText}
-                  onChange={(e) => setHandwrittenText(e.target.value)}
-                  onFocus={handleTextareaFocus}
-                  className="w-full h-full min-h-[400px] sm:min-h-[600px] font-handwriting text-lg sm:text-xl leading-8 sm:leading-10 bg-transparent border-none focus-visible:ring-0 resize-none touch-none"
-                  placeholder="✍️ Write with your finger or stylus here..."
-                  style={{ lineHeight: isMobile ? '32px' : '40px' }}
+                  penColor={penColor}
+                  penThickness={penThickness}
+                  isEraser={isEraser}
                 />
               </div>
             </div>
@@ -501,7 +535,7 @@ const StudentWorkspace = () => {
                 <div className="aspect-[8.5/11] bg-white lined-paper rounded border border-border mb-2">
                   <div className="p-2">
                     <p className="font-handwriting text-[8px] leading-tight opacity-60">
-                      {handwrittenText.substring(0, 100)}...
+                      Page preview...
                     </p>
                   </div>
                 </div>
