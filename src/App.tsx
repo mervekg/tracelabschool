@@ -12,6 +12,7 @@ import TeacherDashboard from "./pages/TeacherDashboard";
 import TeacherReview from "./pages/TeacherReview";
 import TeacherAccommodations from "./pages/TeacherAccommodations";
 import TeacherAssignmentSettings from "./pages/TeacherAssignmentSettings";
+import TeacherViolationReports from "./pages/TeacherViolationReports";
 import RubricBuilder from "./pages/RubricBuilder";
 import ParentDashboard from "./pages/ParentDashboard";
 import ParentPortfolio from "./pages/ParentPortfolio";
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/teacher/review" element={<TeacherReview />} />
           <Route path="/teacher/accommodations" element={<TeacherAccommodations />} />
           <Route path="/teacher/assignment-settings" element={<TeacherAssignmentSettings />} />
+          <Route path="/teacher/violation-reports" element={<TeacherViolationReports />} />
           <Route path="/teacher/rubric-builder" element={<RubricBuilder />} />
           <Route path="/parent" element={<ParentDashboard />} />
           <Route path="/parent/portfolio" element={<ParentPortfolio />} />

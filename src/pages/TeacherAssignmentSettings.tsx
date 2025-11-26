@@ -30,9 +30,19 @@ const TeacherAssignmentSettings = () => {
             <h1 className="text-3xl font-bold text-primary">Assignment Settings</h1>
             <p className="text-muted-foreground">Configure lockdown mode and assessment security</p>
           </div>
-          <Button variant="outline" onClick={() => navigate('/teacher/dashboard')}>
-            Cancel
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/teacher/violation-reports')}
+              className="border-destructive/50 hover:bg-destructive/10"
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              View Reports
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/teacher/dashboard')}>
+              Cancel
+            </Button>
+          </div>
         </div>
 
         {/* Assignment Info */}
