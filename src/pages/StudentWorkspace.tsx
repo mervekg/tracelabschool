@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { Undo2, Redo2, Save, Send, Plus, Timer, Palette, PenTool, Eraser, Mic, MicOff, Volume2, Zap, MessageSquare, ScanText } from "lucide-react";
 import { HandwritingCanvas, HandwritingCanvasRef } from "@/components/HandwritingCanvas";
+import { LockdownMode } from "@/components/LockdownMode";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,6 +29,8 @@ const StudentWorkspace = () => {
   const [showSidebar, setShowSidebar] = useState(!isMobile);
   const [recognizedText, setRecognizedText] = useState("");
   const [isRecognizing, setIsRecognizing] = useState(false);
+  const [lockdownEnabled, setLockdownEnabled] = useState(true); // Set by teacher per assignment
+  const [violationCount, setViolationCount] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const canvasRef = useRef<HandwritingCanvasRef>(null);
@@ -184,8 +187,27 @@ const StudentWorkspace = () => {
     }
   };
 
+  const handleLockdownViolation = (violationType: string) => {
+    setViolationCount(prev => prev + 1);
+    // In production, this would log to database for teacher review
+    console.log(`Lockdown violation recorded: ${violationType}`, {
+      student: "Emma Rodriguez",
+      assignment: "Paragraph Writing: My Weekend",
+      timestamp: new Date().toISOString(),
+      violationType,
+      violationNumber: violationCount + 1
+    });
+  };
+
   return (
     <div className="min-h-screen paper-texture">
+      {/* Lockdown Mode Handler */}
+      <LockdownMode
+        isEnabled={lockdownEnabled}
+        assignmentName="Paragraph Writing: My Weekend"
+        onViolation={handleLockdownViolation}
+      />
+      
       {/* Focus Mode Overlay Animation */}
       {focusMode && (
         <>

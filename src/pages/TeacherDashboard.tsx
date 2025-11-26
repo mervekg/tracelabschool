@@ -1,4 +1,4 @@
-import { Users, FileCheck, AlertCircle, TrendingUp, BookOpen, Calendar } from "lucide-react";
+import { Users, FileCheck, AlertCircle, TrendingUp, BookOpen, Calendar, Shield } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,14 @@ const TeacherDashboard = () => {
               onClick={() => navigate('/teacher/accommodations')}
             >
               Accommodations
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => navigate('/teacher/assignment-settings')}
+              className="border-destructive/50 hover:bg-destructive/10"
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              Lockdown
             </Button>
             <Button className="bg-gradient-to-r from-primary to-primary/80">
               <Calendar className="w-4 h-4 mr-2" />
