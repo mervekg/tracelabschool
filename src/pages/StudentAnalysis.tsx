@@ -19,12 +19,12 @@ const StudentAnalysis = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-primary mb-1">Solvia Analysis Complete</h1>
+            <h1 className="text-3xl font-bold text-primary mb-1">Learnion Analysis Complete</h1>
             <p className="text-sm text-muted-foreground">Paragraph Writing: My Weekend</p>
           </div>
           <Badge className="bg-gradient-to-r from-accent to-primary text-white text-lg px-4 py-2 flex items-center gap-2">
             <Sparkles className="w-5 h-5" />
-            Solvia Analyzed
+            Learnion Analyzed
           </Badge>
         </div>
 
@@ -35,7 +35,7 @@ const StudentAnalysis = () => {
               <Sparkles className="w-6 h-6 text-accent-foreground" />
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-semibold mb-2">Solvia Has Analyzed Your Work</h2>
+              <h2 className="text-xl font-semibold mb-2">Learnion Has Analyzed Your Work</h2>
               <p className="text-foreground/90">
                 Great effort, Emma! Your writing shows strong descriptive vocabulary and proper punctuation. 
                 I've highlighted areas where you can improve to make your paragraph even stronger.
@@ -46,7 +46,7 @@ const StudentAnalysis = () => {
 
         {/* Your Submitted Work with Highlights */}
         <Card className="p-6 shadow-card">
-          <h2 className="text-2xl font-semibold mb-4">Your Work with Solvia Highlights</h2>
+          <h2 className="text-2xl font-semibold mb-4">Your Work with Learnion Highlights</h2>
           <div className="lined-paper bg-white p-8 rounded-xl border border-border min-h-[400px]">
             <div className="font-handwriting text-lg leading-10">
               <span className="bg-warning/20 border-b-2 border-warning cursor-pointer" title="Topic Sentence - Consider making this more direct">
@@ -171,7 +171,7 @@ const StudentAnalysis = () => {
         <Card className="p-6 shadow-card bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
           <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-primary" />
-            Solvia's Suggestions for Improvement
+            Learnion's Suggestions for Improvement
           </h2>
           <div className="space-y-3">
             <div className="flex items-start gap-3 p-4 rounded-xl bg-card border border-border">

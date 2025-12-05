@@ -85,7 +85,7 @@ const Index = () => {
             </p>
           )}
           <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-            Solvia
+            Learnion
           </h1>
           <p className="text-2xl text-muted-foreground max-w-2xl mx-auto">
             Educational Assessment Platform for Human-Centered Learning

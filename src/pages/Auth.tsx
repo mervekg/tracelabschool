@@ -157,7 +157,7 @@ const Auth = () => {
       <Card className="w-full max-w-md p-8 shadow-card">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent mb-2">
-            Solvia
+            Learnion
           </h1>
           <p className="text-muted-foreground">Welcome back</p>
         </div>
