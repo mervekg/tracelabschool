@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import LearnionLogo from "@/components/LearnionLogo";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -156,9 +157,9 @@ const Auth = () => {
     <div className="min-h-screen paper-texture flex items-center justify-center p-6">
       <Card className="w-full max-w-md p-8 shadow-card">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent mb-2">
-            Learnion
-          </h1>
+          <div className="flex justify-center mb-2">
+            <LearnionLogo size="lg" />
+          </div>
           <p className="text-muted-foreground">Welcome back</p>
         </div>
 

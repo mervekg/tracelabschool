@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import LearnionLogo from "@/components/LearnionLogo";
 
 const StudentAnalysis = () => {
   const navigate = useNavigate();
@@ -18,13 +19,16 @@ const StudentAnalysis = () => {
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-primary mb-1">Learnion Analysis Complete</h1>
-            <p className="text-sm text-muted-foreground">Paragraph Writing: My Weekend</p>
+          <div className="flex items-center gap-4">
+            <LearnionLogo size="sm" showText={false} />
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-1">Analysis Complete</h1>
+              <p className="text-sm text-muted-foreground">Paragraph Writing: My Weekend</p>
+            </div>
           </div>
           <Badge className="bg-gradient-to-r from-accent to-primary text-white text-lg px-4 py-2 flex items-center gap-2">
             <Sparkles className="w-5 h-5" />
-            Analysis Complete
+            Ready for Review
           </Badge>
         </div>
 

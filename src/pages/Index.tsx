@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
+import LearnionLogo from "@/components/LearnionLogo";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -84,9 +85,9 @@ const Index = () => {
               Welcome back, {user.email}
             </p>
           )}
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-            Learnion
-          </h1>
+          <div className="flex justify-center">
+            <LearnionLogo size="xl" />
+          </div>
           <p className="text-2xl text-muted-foreground max-w-2xl mx-auto">
             Educational Assessment Platform for Human-Centered Learning
           </p>
