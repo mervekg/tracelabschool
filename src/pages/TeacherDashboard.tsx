@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import LearnionLogo from "@/components/LearnionLogo";
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
@@ -25,9 +26,12 @@ const TeacherDashboard = () => {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-primary mb-2">Teacher Dashboard</h1>
-            <p className="text-muted-foreground">Grade 5 - Section A</p>
+          <div className="flex items-center gap-4">
+            <LearnionLogo size="lg" showText={false} />
+            <div>
+              <h1 className="text-4xl font-bold text-primary mb-2">Teacher Dashboard</h1>
+              <p className="text-muted-foreground">Grade 5 - Section A</p>
+            </div>
           </div>
           <div className="flex gap-2">
             <Button 

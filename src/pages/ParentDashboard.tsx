@@ -2,6 +2,7 @@ import { User, TrendingUp, Calendar, MessageSquare, Award, BookOpen } from "luci
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import LearnionLogo from "@/components/LearnionLogo";
 
 const ParentDashboard = () => {
   const childProgress = {
@@ -25,9 +26,12 @@ const ParentDashboard = () => {
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-primary mb-2">Parent Portal</h1>
-            <p className="text-muted-foreground">Welcome back! Here's {childProgress.name}'s progress</p>
+          <div className="flex items-center gap-4">
+            <LearnionLogo size="lg" showText={false} />
+            <div>
+              <h1 className="text-4xl font-bold text-primary mb-2">Parent Portal</h1>
+              <p className="text-muted-foreground">Welcome back! Here's {childProgress.name}'s progress</p>
+            </div>
           </div>
           <Button className="bg-gradient-to-r from-primary to-primary/80">
             <MessageSquare className="w-4 h-4 mr-2" />
