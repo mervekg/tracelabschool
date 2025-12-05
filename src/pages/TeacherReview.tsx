@@ -112,7 +112,7 @@ const TeacherReview = () => {
             <Card className="p-6 shadow-card bg-gradient-to-br from-accent/10 to-accent/5 border-accent/30">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="w-5 h-5 text-accent-foreground" />
-                <h2 className="text-lg font-semibold">AI Pre-Analysis</h2>
+                <h2 className="text-lg font-semibold">Solvia Pre-Analysis</h2>
               </div>
               <div className="space-y-3 text-sm">
                 <div className="p-3 rounded-lg bg-card border border-border">
@@ -156,7 +156,7 @@ const TeacherReview = () => {
                     checked={acceptAIScoring}
                     onCheckedChange={setAcceptAIScoring}
                   />
-                  <span className="text-xs text-muted-foreground">Accept AI</span>
+                  <span className="text-xs text-muted-foreground">Accept Solvia</span>
                 </div>
               </div>
               <div className="space-y-4">
