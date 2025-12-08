@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import LearnionLogo from "@/components/LearnionLogo";
+import SolviaLogo from "@/components/SolviaLogo";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const AdminDashboard = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <LearnionLogo size="lg" showText={false} />
+            <SolviaLogo size="lg" showText={false} />
             <div>
               <h1 className="text-4xl font-bold text-primary mb-2">Admin Dashboard</h1>
               <p className="text-muted-foreground">Lincoln Elementary School</p>

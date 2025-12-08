@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import LearnionLogo from "@/components/LearnionLogo";
+import SolviaLogo from "@/components/SolviaLogo";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -86,7 +86,7 @@ const Index = () => {
             </p>
           )}
           <div className="flex justify-center">
-            <LearnionLogo size="xl" />
+            <SolviaLogo size="xl" />
           </div>
           <p className="text-2xl text-muted-foreground max-w-2xl mx-auto">
             Educational Assessment Platform for Human-Centered Learning

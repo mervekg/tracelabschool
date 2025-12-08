@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import LearnionLogo from "@/components/LearnionLogo";
+import SolviaLogo from "@/components/SolviaLogo";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -158,7 +158,7 @@ const Auth = () => {
       <Card className="w-full max-w-md p-8 shadow-card">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-2">
-            <LearnionLogo size="lg" />
+            <SolviaLogo size="lg" />
           </div>
           <p className="text-muted-foreground">Welcome back</p>
         </div>
