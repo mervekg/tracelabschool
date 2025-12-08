@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import StudentDashboard from "./pages/StudentDashboard";
@@ -32,20 +33,85 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/student" element={<StudentDashboard />} />
-          <Route path="/student/workspace" element={<StudentWorkspace />} />
-          <Route path="/student/analysis" element={<StudentAnalysis />} />
-          <Route path="/student/feedback" element={<StudentFeedback />} />
-          <Route path="/teacher" element={<TeacherDashboard />} />
-          <Route path="/teacher/review" element={<TeacherReview />} />
-          <Route path="/teacher/accommodations" element={<TeacherAccommodations />} />
-          <Route path="/teacher/assignment-settings" element={<TeacherAssignmentSettings />} />
-          <Route path="/teacher/violation-reports" element={<TeacherViolationReports />} />
-          <Route path="/teacher/rubric-builder" element={<RubricBuilder />} />
-          <Route path="/parent" element={<ParentDashboard />} />
-          <Route path="/parent/portfolio" element={<ParentPortfolio />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/accommodation-approvals" element={<AdminAccommodationApprovals />} />
+          
+          {/* Student routes - require 'student' role */}
+          <Route path="/student" element={
+            <ProtectedRoute requiredRole="student">
+              <StudentDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/student/workspace" element={
+            <ProtectedRoute requiredRole="student">
+              <StudentWorkspace />
+            </ProtectedRoute>
+          } />
+          <Route path="/student/analysis" element={
+            <ProtectedRoute requiredRole="student">
+              <StudentAnalysis />
+            </ProtectedRoute>
+          } />
+          <Route path="/student/feedback" element={
+            <ProtectedRoute requiredRole="student">
+              <StudentFeedback />
+            </ProtectedRoute>
+          } />
+          
+          {/* Teacher routes - require 'teacher' role */}
+          <Route path="/teacher" element={
+            <ProtectedRoute requiredRole="teacher">
+              <TeacherDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/teacher/review" element={
+            <ProtectedRoute requiredRole="teacher">
+              <TeacherReview />
+            </ProtectedRoute>
+          } />
+          <Route path="/teacher/accommodations" element={
+            <ProtectedRoute requiredRole="teacher">
+              <TeacherAccommodations />
+            </ProtectedRoute>
+          } />
+          <Route path="/teacher/assignment-settings" element={
+            <ProtectedRoute requiredRole="teacher">
+              <TeacherAssignmentSettings />
+            </ProtectedRoute>
+          } />
+          <Route path="/teacher/violation-reports" element={
+            <ProtectedRoute requiredRole="teacher">
+              <TeacherViolationReports />
+            </ProtectedRoute>
+          } />
+          <Route path="/teacher/rubric-builder" element={
+            <ProtectedRoute requiredRole="teacher">
+              <RubricBuilder />
+            </ProtectedRoute>
+          } />
+          
+          {/* Parent routes - require 'parent' role */}
+          <Route path="/parent" element={
+            <ProtectedRoute requiredRole="parent">
+              <ParentDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/parent/portfolio" element={
+            <ProtectedRoute requiredRole="parent">
+              <ParentPortfolio />
+            </ProtectedRoute>
+          } />
+          
+          {/* Admin routes - require 'admin' role */}
+          <Route path="/admin" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/accommodation-approvals" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminAccommodationApprovals />
+            </ProtectedRoute>
+          } />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

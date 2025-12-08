@@ -6,75 +6,143 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Maximum payload size: 10MB in base64 (approximately 7.5MB decoded)
+const MAX_BASE64_SIZE = 10 * 1024 * 1024;
+
+// Validate base64 string format
+function isValidBase64(str: string): boolean {
+  if (!str || typeof str !== 'string') return false;
+  // Remove data URL prefix if present
+  const base64Data = str.includes(',') ? str.split(',')[1] : str;
+  if (!base64Data) return false;
+  // Check for valid base64 characters
+  const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+  return base64Regex.test(base64Data);
+}
+
+// Extract and validate image MIME type from data URL
+function getImageMimeType(dataUrl: string): string | null {
+  const match = dataUrl.match(/^data:(image\/[a-zA-Z+]+);base64,/);
+  if (!match) return null;
+  const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+  return validTypes.includes(match[1]) ? match[1] : null;
+}
+
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { image } = await req.json();
-    
-    if (!image) {
-      throw new Error('No image data provided');
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAIApiKey) {
+      console.error('OPENAI_API_KEY is not configured');
+      return new Response(
+        JSON.stringify({ error: 'Service configuration error' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    console.log('Processing handwriting recognition request...');
+    const { image } = await req.json();
 
-    // Call OpenAI Vision API to recognize handwriting
+    // Validate image data exists
+    if (!image) {
+      console.log('No image data provided');
+      return new Response(
+        JSON.stringify({ error: 'Image data is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate payload size
+    if (image.length > MAX_BASE64_SIZE) {
+      console.log('Image payload too large:', image.length);
+      return new Response(
+        JSON.stringify({ error: 'Image size exceeds maximum allowed (10MB)' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate MIME type for data URLs
+    if (image.startsWith('data:')) {
+      const mimeType = getImageMimeType(image);
+      if (!mimeType) {
+        console.log('Invalid image MIME type');
+        return new Response(
+          JSON.stringify({ error: 'Invalid image format. Supported: PNG, JPEG, GIF, WebP' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // Validate base64 format
+    if (!isValidBase64(image)) {
+      console.log('Invalid base64 format');
+      return new Response(
+        JSON.stringify({ error: 'Invalid image encoding' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Processing handwriting recognition request');
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model: 'gpt-4o',
         messages: [
           {
+            role: 'system',
+            content: 'You are a handwriting recognition expert. Your task is to transcribe handwritten text from images accurately. Preserve the original formatting, including line breaks and paragraphs. If the handwriting is unclear, make your best attempt and indicate uncertain words with [unclear]. Only output the transcribed text, no explanations.'
+          },
+          {
             role: 'user',
             content: [
               {
                 type: 'text',
-                text: 'Please transcribe all the handwritten text you see in this image. Return only the transcribed text without any additional commentary or formatting. If there is no text visible, return "No text detected".'
+                text: 'Please transcribe the handwritten text in this image:'
               },
               {
                 type: 'image_url',
                 image_url: {
-                  url: image
+                  url: image.startsWith('data:') ? image : `data:image/png;base64,${image}`
                 }
               }
             ]
           }
         ],
-        max_tokens: 1000,
+        max_tokens: 4096,
       }),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('OpenAI API error:', response.status, errorText);
-      throw new Error(`OpenAI API error: ${errorText}`);
+      const errorData = await response.text();
+      console.error('OpenAI API error:', response.status, errorData);
+      return new Response(
+        JSON.stringify({ error: 'Failed to process image' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const result = await response.json();
-    const recognizedText = result.choices[0].message.content;
+    const data = await response.json();
+    const recognizedText = data.choices[0]?.message?.content || '';
 
-    console.log('Handwriting recognition successful');
+    console.log('Handwriting recognition completed successfully');
 
     return new Response(
       JSON.stringify({ text: recognizedText }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    console.error('Error in handwriting-recognition function:', errorMessage);
+    console.error('Error in handwriting-recognition function:', error);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      JSON.stringify({ error: 'An unexpected error occurred' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
