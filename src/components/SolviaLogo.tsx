@@ -1,7 +1,7 @@
 import { GraduationCap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface LearnionLogoProps {
+interface SolviaLogoProps {
   size?: "sm" | "md" | "lg" | "xl";
   showText?: boolean;
   className?: string;
@@ -14,7 +14,7 @@ const sizeConfig = {
   xl: { icon: 48, text: "text-5xl" },
 };
 
-const LearnionLogo = ({ size = "md", showText = true, className }: LearnionLogoProps) => {
+const SolviaLogo = ({ size = "md", showText = true, className }: SolviaLogoProps) => {
   const config = sizeConfig[size];
 
   return (
@@ -34,11 +34,11 @@ const LearnionLogo = ({ size = "md", showText = true, className }: LearnionLogoP
           "font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent",
           config.text
         )}>
-          Learnion
+          Solvia
         </span>
       )}
     </div>
   );
 };
 
-export default LearnionLogo;
+export default SolviaLogo;

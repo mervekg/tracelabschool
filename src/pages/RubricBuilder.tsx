@@ -193,7 +193,7 @@ const RubricBuilder = () => {
             AI Alignment Settings
           </h2>
           <p className="text-sm text-muted-foreground mb-4">
-            Learnion AI will automatically analyze student work based on your rubric categories and provide 
+            Solvia AI will automatically analyze student work based on your rubric categories and provide 
             initial scoring suggestions. You can always override these suggestions.
           </p>
           <div className="flex gap-4">
