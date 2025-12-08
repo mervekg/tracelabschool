@@ -6,85 +6,146 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Maximum payload size: 25MB in base64 (OpenAI limit is 25MB for audio)
+const MAX_BASE64_SIZE = 25 * 1024 * 1024;
+
+// Validate base64 string format
+function isValidBase64(str: string): boolean {
+  if (!str || typeof str !== 'string') return false;
+  // Remove data URL prefix if present
+  const base64Data = str.includes(',') ? str.split(',')[1] : str;
+  if (!base64Data) return false;
+  // Check for valid base64 characters
+  const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+  return base64Regex.test(base64Data);
+}
+
+// Extract and validate audio MIME type from data URL
+function getAudioMimeType(dataUrl: string): string | null {
+  const match = dataUrl.match(/^data:(audio\/[a-zA-Z0-9.+-]+);base64,/);
+  if (!match) return null;
+  const validTypes = [
+    'audio/webm', 'audio/mp3', 'audio/mpeg', 'audio/mp4', 
+    'audio/wav', 'audio/ogg', 'audio/flac', 'audio/m4a'
+  ];
+  return validTypes.includes(match[1]) ? match[1] : null;
+}
+
 // Process base64 in chunks to prevent memory issues
-function processBase64Chunks(base64String: string, chunkSize = 32768) {
-  const chunks: Uint8Array[] = [];
-  let position = 0;
+function processBase64ToArrayBuffer(base64String: string): ArrayBuffer {
+  // Remove data URL prefix if present
+  const base64Data = base64String.includes(',') ? base64String.split(',')[1] : base64String;
+  const binaryString = atob(base64Data);
+  const bytes = new Uint8Array(binaryString.length);
   
-  while (position < base64String.length) {
-    const chunk = base64String.slice(position, position + chunkSize);
-    const binaryChunk = atob(chunk);
-    const bytes = new Uint8Array(binaryChunk.length);
-    
-    for (let i = 0; i < binaryChunk.length; i++) {
-      bytes[i] = binaryChunk.charCodeAt(i);
-    }
-    
-    chunks.push(bytes);
-    position += chunkSize;
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
   }
-
-  const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
-  const result = new Uint8Array(totalLength);
-  let offset = 0;
-
-  for (const chunk of chunks) {
-    result.set(chunk, offset);
-    offset += chunk.length;
-  }
-
-  return result;
+  
+  // Return a new ArrayBuffer by copying the data
+  return bytes.buffer.slice(0) as ArrayBuffer;
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { audio } = await req.json();
-    
-    if (!audio) {
-      throw new Error('No audio data provided');
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAIApiKey) {
+      console.error('OPENAI_API_KEY is not configured');
+      return new Response(
+        JSON.stringify({ error: 'Service configuration error' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Process audio in chunks
-    const binaryAudio = processBase64Chunks(audio);
-    
-    // Prepare form data
+    const { audio } = await req.json();
+
+    // Validate audio data exists
+    if (!audio) {
+      console.log('No audio data provided');
+      return new Response(
+        JSON.stringify({ error: 'Audio data is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate payload size
+    if (audio.length > MAX_BASE64_SIZE) {
+      console.log('Audio payload too large:', audio.length);
+      return new Response(
+        JSON.stringify({ error: 'Audio size exceeds maximum allowed (25MB)' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Determine MIME type
+    let mimeType = 'audio/webm';
+    if (audio.startsWith('data:')) {
+      const detectedType = getAudioMimeType(audio);
+      if (!detectedType) {
+        console.log('Invalid audio MIME type');
+        return new Response(
+          JSON.stringify({ error: 'Invalid audio format. Supported: WebM, MP3, WAV, OGG, FLAC, M4A' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      mimeType = detectedType;
+    }
+
+    // Validate base64 format
+    if (!isValidBase64(audio)) {
+      console.log('Invalid base64 format');
+      return new Response(
+        JSON.stringify({ error: 'Invalid audio encoding' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Processing speech-to-text request');
+
+    // Convert base64 to ArrayBuffer
+    const audioBuffer = processBase64ToArrayBuffer(audio);
+    const audioBlob = new Blob([audioBuffer], { type: mimeType });
+
+    // Create form data for OpenAI API
     const formData = new FormData();
-    const blob = new Blob([binaryAudio], { type: 'audio/webm' });
-    formData.append('file', blob, 'audio.webm');
+    formData.append('file', audioBlob, 'audio.webm');
     formData.append('model', 'whisper-1');
 
-    // Send to OpenAI
     const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Authorization': `Bearer ${openAIApiKey}`,
       },
       body: formData,
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${await response.text()}`);
+      const errorData = await response.text();
+      console.error('OpenAI API error:', response.status, errorData);
+      return new Response(
+        JSON.stringify({ error: 'Failed to process audio' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const result = await response.json();
+    const data = await response.json();
+
+    console.log('Speech-to-text completed successfully');
 
     return new Response(
-      JSON.stringify({ text: result.text }),
+      JSON.stringify({ text: data.text }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    console.error('Error in speech-to-text function:', error);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      JSON.stringify({ error: 'An unexpected error occurred' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
