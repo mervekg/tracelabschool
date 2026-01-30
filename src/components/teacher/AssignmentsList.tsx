@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, FileText, Calendar, ChevronRight, Upload, Link, MessageSquare } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, FileText, Calendar, ChevronRight, Upload, Link, MessageSquare, Sparkles, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import RubricEditor, { Rubric } from "./RubricEditor";
 
 interface Assignment {
   id: string;
@@ -21,16 +23,25 @@ interface Assignment {
   pdf_url?: string | null;
   external_link?: string | null;
   assignment_type?: string | null;
+  has_rubric?: boolean;
+}
+
+interface Skill {
+  skill_code: string;
+  skill_name: string;
+  description?: string;
 }
 
 interface AssignmentsListProps {
   classId: string;
   assignments: Assignment[];
+  gradeLevel: string;
+  subject: string;
   onRefresh: () => void;
   onSelectAssignment: (assignment: Assignment) => void;
 }
 
-const AssignmentsList = ({ classId, assignments, onRefresh, onSelectAssignment }: AssignmentsListProps) => {
+const AssignmentsList = ({ classId, assignments, gradeLevel, subject, onRefresh, onSelectAssignment }: AssignmentsListProps) => {
   const { toast } = useToast();
   const [createOpen, setCreateOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -42,6 +53,24 @@ const AssignmentsList = ({ classId, assignments, onRefresh, onSelectAssignment }
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  // Rubric state
+  const [includeRubric, setIncludeRubric] = useState(false);
+  const [showRubricEditor, setShowRubricEditor] = useState(false);
+  const [rubric, setRubric] = useState<Rubric | null>(null);
+  const [skills, setSkills] = useState<Skill[]>([]);
+
+  useEffect(() => {
+    fetchSkills();
+  }, [classId]);
+
+  const fetchSkills = async () => {
+    const { data } = await supabase
+      .from("class_skills")
+      .select("skill_code, skill_name, description")
+      .eq("class_id", classId);
+    setSkills(data || []);
+  };
+
   const resetForm = () => {
     setTitle("");
     setDescription("");
@@ -49,6 +78,9 @@ const AssignmentsList = ({ classId, assignments, onRefresh, onSelectAssignment }
     setExternalLink("");
     setPdfFile(null);
     setAssignmentType("standard");
+    setIncludeRubric(false);
+    setRubric(null);
+    setShowRubricEditor(false);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,9 +122,49 @@ const AssignmentsList = ({ classId, assignments, onRefresh, onSelectAssignment }
     return urlData.publicUrl;
   };
 
+  const saveRubricToDatabase = async (assignmentId: string, rubricData: Rubric) => {
+    // Insert the rubric
+    const { data: rubricRow, error: rubricError } = await supabase
+      .from("rubrics")
+      .insert({
+        assignment_id: assignmentId,
+        class_id: classId,
+        name: rubricData.name,
+        total_points: rubricData.totalPoints,
+        notes: rubricData.notes || null,
+      })
+      .select()
+      .single();
+
+    if (rubricError) {
+      console.error("Error saving rubric:", rubricError);
+      return;
+    }
+
+    // Insert categories
+    const categoriesData = rubricData.categories.map((cat, index) => ({
+      rubric_id: rubricRow.id,
+      name: cat.name,
+      max_score: cat.maxScore,
+      description: cat.description || null,
+      criteria_excellent: cat.criteria?.excellent || null,
+      criteria_good: cat.criteria?.good || null,
+      criteria_developing: cat.criteria?.developing || null,
+      criteria_needs_improvement: cat.criteria?.needs_improvement || null,
+      sort_order: index,
+    }));
+
+    await supabase.from("rubric_categories").insert(categoriesData);
+  };
+
   const handleCreate = async () => {
     if (!title.trim()) {
       toast({ title: "Error", description: "Title is required", variant: "destructive" });
+      return;
+    }
+
+    if (includeRubric && !rubric) {
+      toast({ title: "Error", description: "Please create a rubric or disable the rubric option", variant: "destructive" });
       return;
     }
 
@@ -107,7 +179,7 @@ const AssignmentsList = ({ classId, assignments, onRefresh, onSelectAssignment }
       }
     }
 
-    const { error } = await supabase.from("assignments").insert({
+    const { data: assignmentData, error } = await supabase.from("assignments").insert({
       class_id: classId,
       title: title.trim(),
       description: description.trim() || null,
@@ -115,18 +187,24 @@ const AssignmentsList = ({ classId, assignments, onRefresh, onSelectAssignment }
       pdf_url: pdfUrl,
       external_link: externalLink.trim() || null,
       assignment_type: assignmentType,
-    });
-
-    setLoading(false);
+    }).select().single();
 
     if (error) {
+      setLoading(false);
       toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Success", description: "Assignment created!" });
-      resetForm();
-      setCreateOpen(false);
-      onRefresh();
+      return;
     }
+
+    // Save rubric if included
+    if (includeRubric && rubric && assignmentData) {
+      await saveRubricToDatabase(assignmentData.id, rubric);
+    }
+
+    setLoading(false);
+    toast({ title: "Success", description: "Assignment created!" + (rubric ? " Rubric saved." : "") });
+    resetForm();
+    setCreateOpen(false);
+    onRefresh();
   };
 
   const getAssignmentIcon = (type?: string | null) => {
@@ -257,8 +335,87 @@ const AssignmentsList = ({ classId, assignments, onRefresh, onSelectAssignment }
                     onChange={(e) => setDueDate(e.target.value)}
                   />
                 </div>
+
+                {/* Rubric Section */}
+                <div className="border-t pt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ClipboardList className="w-4 h-4 text-muted-foreground" />
+                      <Label htmlFor="include-rubric" className="cursor-pointer">Include Rubric</Label>
+                    </div>
+                    <Switch
+                      id="include-rubric"
+                      checked={includeRubric}
+                      onCheckedChange={setIncludeRubric}
+                    />
+                  </div>
+                  {includeRubric && (
+                    <div className="mt-3">
+                      {rubric ? (
+                        <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-sm">{rubric.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {rubric.categories.length} categories • {rubric.totalPoints} points
+                              </p>
+                            </div>
+                            <Button size="sm" variant="outline" onClick={() => setShowRubricEditor(true)}>
+                              Edit
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1"
+                            onClick={() => setShowRubricEditor(true)}
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            Create Manually
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1 bg-violet-50 hover:bg-violet-100 dark:bg-violet-950/30"
+                            onClick={() => setShowRubricEditor(true)}
+                          >
+                            <Sparkles className="w-4 h-4 mr-1" />
+                            Generate with AI
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </Tabs>
+
+            {/* Rubric Editor Dialog */}
+            <Dialog open={showRubricEditor} onOpenChange={setShowRubricEditor}>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {rubric ? "Edit Rubric" : "Create Rubric"}
+                  </DialogTitle>
+                </DialogHeader>
+                <RubricEditor
+                  classId={classId}
+                  gradeLevel={gradeLevel}
+                  subject={subject}
+                  skills={skills}
+                  assignmentContent={description + (title ? ` - ${title}` : "")}
+                  initialRubric={rubric}
+                  onSave={(newRubric) => {
+                    setRubric(newRubric);
+                    setShowRubricEditor(false);
+                  }}
+                  onCancel={() => setShowRubricEditor(false)}
+                />
+              </DialogContent>
+            </Dialog>
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
