@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      assignments: {
+        Row: {
+          class_id: string
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_join_codes: {
         Row: {
           class_id: string
@@ -206,6 +244,66 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      student_submissions: {
+        Row: {
+          ai_feedback: string | null
+          assignment_id: string
+          content: string | null
+          created_at: string
+          handwriting_image_url: string | null
+          id: string
+          score: number | null
+          status: string
+          student_id: string
+          submitted_at: string | null
+          teacher_feedback: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_feedback?: string | null
+          assignment_id: string
+          content?: string | null
+          created_at?: string
+          handwriting_image_url?: string | null
+          id?: string
+          score?: number | null
+          status?: string
+          student_id: string
+          submitted_at?: string | null
+          teacher_feedback?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_feedback?: string | null
+          assignment_id?: string
+          content?: string | null
+          created_at?: string
+          handwriting_image_url?: string | null
+          id?: string
+          score?: number | null
+          status?: string
+          student_id?: string
+          submitted_at?: string | null
+          teacher_feedback?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_submissions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_submissions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       students: {
         Row: {
