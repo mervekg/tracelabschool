@@ -1,7 +1,9 @@
-import { ArrowLeft, User, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, User, Clock, CheckCircle, AlertCircle, Download, FileText, Link, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 interface StudentSubmission {
   id: string;
@@ -12,6 +14,7 @@ interface StudentSubmission {
   ai_feedback: string | null;
   teacher_feedback: string | null;
   score: number | null;
+  handwriting_image_url?: string | null;
   student?: {
     full_name: string;
     email: string;
@@ -22,6 +25,9 @@ interface Assignment {
   id: string;
   title: string;
   description: string | null;
+  pdf_url?: string | null;
+  external_link?: string | null;
+  assignment_type?: string | null;
 }
 
 interface StudentSubmissionsListProps {
@@ -37,6 +43,9 @@ const StudentSubmissionsList = ({
   onBack, 
   onSelectSubmission 
 }: StudentSubmissionsListProps) => {
+  const { toast } = useToast();
+  const [downloading, setDownloading] = useState(false);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "submitted":
@@ -60,27 +69,163 @@ const StudentSubmissionsList = ({
     }
   };
 
+  const downloadSubmission = async (submission: StudentSubmission) => {
+    const studentName = submission.student?.full_name || "Unknown";
+    const content = [];
+    
+    content.push(`Student: ${studentName}`);
+    content.push(`Assignment: ${assignment.title}`);
+    content.push(`Status: ${submission.status}`);
+    content.push(`Submitted: ${submission.submitted_at ? new Date(submission.submitted_at).toLocaleString() : "Not submitted"}`);
+    content.push("");
+    
+    if (submission.content) {
+      content.push("=== Student Response ===");
+      content.push(submission.content);
+      content.push("");
+    }
+    
+    if (submission.ai_feedback) {
+      content.push("=== AI Feedback ===");
+      content.push(submission.ai_feedback);
+      content.push("");
+    }
+    
+    if (submission.teacher_feedback) {
+      content.push("=== Teacher Feedback ===");
+      content.push(submission.teacher_feedback);
+      content.push("");
+    }
+    
+    if (submission.score !== null) {
+      content.push(`Score: ${submission.score}`);
+    }
+
+    const blob = new Blob([content.join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${studentName.replace(/\s+/g, "_")}_${assignment.title.replace(/\s+/g, "_")}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({ title: "Downloaded", description: `${studentName}'s submission downloaded` });
+  };
+
+  const downloadAllSubmissions = async () => {
+    if (submissions.length === 0) {
+      toast({ title: "No submissions", description: "There are no submissions to download", variant: "destructive" });
+      return;
+    }
+
+    setDownloading(true);
+    
+    const allContent: string[] = [];
+    allContent.push(`Assignment: ${assignment.title}`);
+    allContent.push(`Total Submissions: ${submissions.length}`);
+    allContent.push(`Downloaded: ${new Date().toLocaleString()}`);
+    allContent.push("=".repeat(50));
+    allContent.push("");
+
+    submissions.forEach((submission, index) => {
+      const studentName = submission.student?.full_name || "Unknown";
+      allContent.push(`--- Submission ${index + 1}: ${studentName} ---`);
+      allContent.push(`Status: ${submission.status}`);
+      allContent.push(`Submitted: ${submission.submitted_at ? new Date(submission.submitted_at).toLocaleString() : "Not submitted"}`);
+      
+      if (submission.content) {
+        allContent.push("");
+        allContent.push("Response:");
+        allContent.push(submission.content);
+      }
+      
+      if (submission.ai_feedback) {
+        allContent.push("");
+        allContent.push("AI Feedback:");
+        allContent.push(submission.ai_feedback);
+      }
+      
+      if (submission.teacher_feedback) {
+        allContent.push("");
+        allContent.push("Teacher Feedback:");
+        allContent.push(submission.teacher_feedback);
+      }
+      
+      if (submission.score !== null) {
+        allContent.push(`Score: ${submission.score}`);
+      }
+      
+      allContent.push("");
+      allContent.push("=".repeat(50));
+      allContent.push("");
+    });
+
+    const blob = new Blob([allContent.join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${assignment.title.replace(/\s+/g, "_")}_all_submissions.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    setDownloading(false);
+    toast({ title: "Downloaded", description: `All ${submissions.length} submissions downloaded` });
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={onBack}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div>
-          <h3 className="font-semibold text-lg">{assignment.title}</h3>
-          <p className="text-sm text-muted-foreground">
-            {submissions.length} student entries
-          </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={onBack}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div>
+            <h3 className="font-semibold text-lg">{assignment.title}</h3>
+            <p className="text-sm text-muted-foreground">
+              {submissions.length} student entries
+            </p>
+          </div>
         </div>
+        <Button 
+          variant="outline" 
+          onClick={downloadAllSubmissions}
+          disabled={downloading || submissions.length === 0}
+        >
+          <Download className="w-4 h-4 mr-2" />
+          {downloading ? "Downloading..." : "Download All"}
+        </Button>
       </div>
 
-      {assignment.description && (
-        <Card>
-          <CardContent className="p-4">
+      {/* Assignment Details */}
+      <Card>
+        <CardContent className="p-4 space-y-3">
+          {assignment.description && (
             <p className="text-sm text-muted-foreground">{assignment.description}</p>
-          </CardContent>
-        </Card>
-      )}
+          )}
+          <div className="flex flex-wrap gap-2">
+            {assignment.pdf_url && (
+              <Button variant="outline" size="sm" asChild>
+                <a href={assignment.pdf_url} target="_blank" rel="noopener noreferrer">
+                  <FileText className="w-4 h-4 mr-1" />
+                  View PDF
+                </a>
+              </Button>
+            )}
+            {assignment.external_link && (
+              <Button variant="outline" size="sm" asChild>
+                <a href={assignment.external_link} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="w-4 h-4 mr-1" />
+                  Open Link
+                </a>
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {submissions.length === 0 ? (
         <Card>
@@ -113,6 +258,16 @@ const StudentSubmissionsList = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      downloadSubmission(submission);
+                    }}
+                  >
+                    <Download className="w-4 h-4" />
+                  </Button>
                   {submission.score !== null && (
                     <Badge variant="outline">{submission.score} pts</Badge>
                   )}

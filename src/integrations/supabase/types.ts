@@ -16,29 +16,38 @@ export type Database = {
     Tables: {
       assignments: {
         Row: {
+          assignment_type: string | null
           class_id: string
           created_at: string
           description: string | null
           due_date: string | null
+          external_link: string | null
           id: string
+          pdf_url: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          assignment_type?: string | null
           class_id: string
           created_at?: string
           description?: string | null
           due_date?: string | null
+          external_link?: string | null
           id?: string
+          pdf_url?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          assignment_type?: string | null
           class_id?: string
           created_at?: string
           description?: string | null
           due_date?: string | null
+          external_link?: string | null
           id?: string
+          pdf_url?: string | null
           title?: string
           updated_at?: string
         }
