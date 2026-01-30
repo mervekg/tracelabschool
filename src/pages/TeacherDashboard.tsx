@@ -1,22 +1,20 @@
-import { useState } from "react";
-import { Users, FileCheck, AlertCircle, TrendingUp, BookOpen, Calendar, Shield, Plus, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Users, FileCheck, AlertCircle, TrendingUp, BookOpen, Calendar, Shield, Search } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import SolviaLogo from "@/components/SolviaLogo";
 import CourseCard from "@/components/CourseCard";
-
-// Mock teacher name - in production this would come from auth/profile
-const TEACHER_LAST_NAME = "Gokgol";
+import CreateClassDialog from "@/components/CreateClassDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Course {
   id: string;
   title: string;
   code: string;
   section: string;
-  schoolName: string;
+  gradeLevel: string;
   thumbnailUrl?: string;
   isFavorite: boolean;
   color: string;
@@ -25,89 +23,93 @@ interface Course {
 const TeacherDashboard = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  
-  // Mock courses data - in production this would come from the database
-  const [courses, setCourses] = useState<Course[]>([
-    {
-      id: "1",
-      title: "Mathematics",
-      code: `Math_${TEACHER_LAST_NAME}_6A`,
-      section: "Grade 6 - Section A",
-      schoolName: "Lincoln Elementary School",
-      thumbnailUrl: "",
-      isFavorite: true,
-      color: "bg-blue-100",
-    },
-    {
-      id: "2", 
-      title: "Science",
-      code: `Science_${TEACHER_LAST_NAME}_6B`,
-      section: "Grade 6 - Section B",
-      schoolName: "Lincoln Elementary School",
-      thumbnailUrl: "",
-      isFavorite: false,
-      color: "bg-green-100",
-    },
-    {
-      id: "3",
-      title: "English",
-      code: `English_${TEACHER_LAST_NAME}_5A`,
-      section: "Grade 5 - Section A", 
-      schoolName: "Lincoln Elementary School",
-      thumbnailUrl: "",
-      isFavorite: true,
-      color: "bg-purple-100",
-    },
-    {
-      id: "4",
-      title: "History",
-      code: `History_${TEACHER_LAST_NAME}_6C`,
-      section: "Grade 6 - Section C",
-      schoolName: "Lincoln Elementary School",
-      thumbnailUrl: "",
-      isFavorite: false,
-      color: "bg-amber-100",
-    },
-    {
-      id: "5",
-      title: "Physics",
-      code: `Physics_${TEACHER_LAST_NAME}_7A`,
-      section: "Grade 7 - Section A",
-      schoolName: "Lincoln Elementary School",
-      thumbnailUrl: "",
-      isFavorite: false,
-      color: "bg-cyan-100",
-    },
-    {
-      id: "6",
-      title: "Chemistry",
-      code: `Chemistry_${TEACHER_LAST_NAME}_7B`,
-      section: "Grade 7 - Section B",
-      schoolName: "Lincoln Elementary School",
-      thumbnailUrl: "",
-      isFavorite: false,
-      color: "bg-pink-100",
-    },
-  ]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [teacherLastName, setTeacherLastName] = useState("Teacher");
+  const [loading, setLoading] = useState(true);
 
-  const handleThumbnailChange = (courseId: string, url: string) => {
-    setCourses(prev => 
-      prev.map(course => 
-        course.id === courseId 
-          ? { ...course, thumbnailUrl: url }
-          : course
-      )
-    );
+  const fetchClasses = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Fetch teacher's last name from profile
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.full_name) {
+      const nameParts = profile.full_name.split(" ");
+      setTeacherLastName(nameParts[nameParts.length - 1] || "Teacher");
+    } else {
+      // Try to get from email
+      const emailName = user.email?.split("@")[0] || "Teacher";
+      setTeacherLastName(emailName.charAt(0).toUpperCase() + emailName.slice(1));
+    }
+
+    // Fetch classes
+    const { data: classes, error } = await supabase
+      .from("classes")
+      .select("*")
+      .eq("teacher_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching classes:", error);
+    } else if (classes) {
+      setCourses(classes.map(c => ({
+        id: c.id,
+        title: c.subject,
+        code: c.name,
+        section: c.section,
+        gradeLevel: c.grade_level,
+        thumbnailUrl: c.thumbnail_url || "",
+        isFavorite: c.is_favorite || false,
+        color: c.color || "#6366f1",
+      })));
+    }
+    setLoading(false);
   };
 
-  const handleFavoriteToggle = (courseId: string) => {
-    setCourses(prev =>
-      prev.map(course =>
-        course.id === courseId
-          ? { ...course, isFavorite: !course.isFavorite }
-          : course
-      )
-    );
+  useEffect(() => {
+    fetchClasses();
+  }, []);
+
+  const handleThumbnailChange = async (courseId: string, url: string) => {
+    const { error } = await supabase
+      .from("classes")
+      .update({ thumbnail_url: url })
+      .eq("id", courseId);
+
+    if (!error) {
+      setCourses(prev => 
+        prev.map(course => 
+          course.id === courseId 
+            ? { ...course, thumbnailUrl: url }
+            : course
+        )
+      );
+    }
+  };
+
+  const handleFavoriteToggle = async (courseId: string) => {
+    const course = courses.find(c => c.id === courseId);
+    if (!course) return;
+
+    const { error } = await supabase
+      .from("classes")
+      .update({ is_favorite: !course.isFavorite })
+      .eq("id", courseId);
+
+    if (!error) {
+      setCourses(prev =>
+        prev.map(c =>
+          c.id === courseId
+            ? { ...c, isFavorite: !c.isFavorite }
+            : c
+        )
+      );
+    }
   };
 
   const filteredCourses = courses.filter(course =>
@@ -216,36 +218,44 @@ const TeacherDashboard = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-foreground">My Courses</h2>
-            <Button className="bg-primary hover:bg-primary/90">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Course
-            </Button>
+            <CreateClassDialog 
+              onClassCreated={fetchClasses} 
+              teacherLastName={teacherLastName}
+            />
           </div>
 
           {/* Course Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredCourses.map((course) => (
-              <CourseCard
-                key={course.id}
-                id={course.id}
-                title={course.title}
-                code={course.code}
-                section={course.section}
-                schoolName={course.schoolName}
-                thumbnailUrl={course.thumbnailUrl}
-                isFavorite={course.isFavorite}
-                color={course.color}
-                onThumbnailChange={handleThumbnailChange}
-                onFavoriteToggle={handleFavoriteToggle}
-                onClick={() => navigate('/teacher/review')}
-              />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredCourses.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  id={course.id}
+                  title={course.title}
+                  code={course.code}
+                  section={`${course.gradeLevel} - ${course.section}`}
+                  schoolName=""
+                  thumbnailUrl={course.thumbnailUrl}
+                  isFavorite={course.isFavorite}
+                  color={course.color}
+                  onThumbnailChange={handleThumbnailChange}
+                  onFavoriteToggle={handleFavoriteToggle}
+                  onClick={() => navigate('/teacher/review')}
+                />
+              ))}
+            </div>
+          )}
 
-          {filteredCourses.length === 0 && (
+          {!loading && filteredCourses.length === 0 && (
             <div className="text-center py-12">
               <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No courses found matching "{searchQuery}"</p>
+              <p className="text-muted-foreground">
+                {searchQuery ? `No courses found matching "${searchQuery}"` : "No courses yet. Click 'Add Course' to create your first class!"}
+              </p>
             </div>
           )}
         </div>

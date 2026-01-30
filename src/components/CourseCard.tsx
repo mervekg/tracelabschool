@@ -57,11 +57,21 @@ const CourseCard = ({
     setIsEditOpen(false);
   };
 
+  // Convert hex color to a lighter background variant
+  const getBgStyle = () => {
+    if (thumbnailUrl) return {};
+    // If color is a Tailwind class (starts with "bg-"), use it directly
+    if (color.startsWith("bg-")) return {};
+    // Otherwise treat it as a hex color and create a light background
+    return { backgroundColor: `${color}20` };
+  };
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-all cursor-pointer group">
       {/* Thumbnail Area */}
       <div 
-        className={`relative h-40 ${!thumbnailUrl ? color : ""} flex items-center justify-center overflow-hidden`}
+        className={`relative h-40 ${!thumbnailUrl && color.startsWith("bg-") ? color : ""} flex items-center justify-center overflow-hidden`}
+        style={getBgStyle()}
         onClick={onClick}
       >
         {thumbnailUrl ? (
