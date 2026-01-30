@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Users, FileText, UserCircle, ArrowLeft, Plus, Upload, Key, Copy, Check, Trash2 } from "lucide-react";
+import { Users, FileText, UserCircle, ArrowLeft, Plus, Upload, Key, Copy, Check, Trash2, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import TeacherLayout from "@/components/teacher/TeacherLayout";
 import AssignmentsList from "@/components/teacher/AssignmentsList";
 import StudentSubmissionsList from "@/components/teacher/StudentSubmissionsList";
 import SubmissionReview from "@/components/teacher/SubmissionReview";
+import SkillsManager from "@/components/teacher/SkillsManager";
 
 interface Student {
   id: string;
@@ -435,18 +436,22 @@ const TeacherClassDetail = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="students" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsList className="grid w-full grid-cols-4 max-w-lg">
             <TabsTrigger value="students" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
-              Students ({students.length})
+              Students
             </TabsTrigger>
             <TabsTrigger value="assignments" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
               Assignments
             </TabsTrigger>
+            <TabsTrigger value="skills" className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Skills
+            </TabsTrigger>
             <TabsTrigger value="parents" className="flex items-center gap-2">
               <UserCircle className="w-4 h-4" />
-              Parents ({parents.length})
+              Parents
             </TabsTrigger>
           </TabsList>
 
@@ -558,10 +563,17 @@ const TeacherClassDetail = () => {
               <AssignmentsList
                 classId={classId!}
                 assignments={assignments}
+                gradeLevel={classInfo?.grade_level || ""}
+                subject={classInfo?.subject || ""}
                 onRefresh={fetchClassData}
                 onSelectAssignment={handleSelectAssignment}
               />
             )}
+          </TabsContent>
+
+          {/* Skills Tab */}
+          <TabsContent value="skills" className="space-y-4">
+            <SkillsManager classId={classId!} />
           </TabsContent>
 
           {/* Parents Tab */}

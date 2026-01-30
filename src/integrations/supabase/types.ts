@@ -93,6 +93,41 @@ export type Database = {
           },
         ]
       }
+      class_skills: {
+        Row: {
+          class_id: string
+          created_at: string
+          description: string | null
+          id: string
+          skill_code: string
+          skill_name: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          skill_code: string
+          skill_name: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          skill_code?: string
+          skill_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_skills_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       classes: {
         Row: {
           color: string | null
@@ -253,6 +288,107 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      rubric_categories: {
+        Row: {
+          created_at: string
+          criteria_developing: string | null
+          criteria_excellent: string | null
+          criteria_good: string | null
+          criteria_needs_improvement: string | null
+          description: string | null
+          id: string
+          max_score: number
+          name: string
+          rubric_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          criteria_developing?: string | null
+          criteria_excellent?: string | null
+          criteria_good?: string | null
+          criteria_needs_improvement?: string | null
+          description?: string | null
+          id?: string
+          max_score?: number
+          name: string
+          rubric_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          criteria_developing?: string | null
+          criteria_excellent?: string | null
+          criteria_good?: string | null
+          criteria_needs_improvement?: string | null
+          description?: string | null
+          id?: string
+          max_score?: number
+          name?: string
+          rubric_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rubric_categories_rubric_id_fkey"
+            columns: ["rubric_id"]
+            isOneToOne: false
+            referencedRelation: "rubrics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rubrics: {
+        Row: {
+          assignment_id: string | null
+          class_id: string | null
+          created_at: string
+          id: string
+          is_template: boolean | null
+          name: string
+          notes: string | null
+          total_points: number
+          updated_at: string
+        }
+        Insert: {
+          assignment_id?: string | null
+          class_id?: string | null
+          created_at?: string
+          id?: string
+          is_template?: boolean | null
+          name: string
+          notes?: string | null
+          total_points?: number
+          updated_at?: string
+        }
+        Update: {
+          assignment_id?: string | null
+          class_id?: string | null
+          created_at?: string
+          id?: string
+          is_template?: boolean | null
+          name?: string
+          notes?: string | null
+          total_points?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rubrics_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rubrics_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       student_submissions: {
         Row: {

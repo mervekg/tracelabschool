@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 interface RubricRequest {
@@ -116,15 +116,16 @@ Return a JSON object with this exact structure:
     // Generate the rubric
     const rubricPrompt = `You are an expert educator creating a comprehensive grading rubric for ${gradeLevel} ${subject}.
 
-${assignmentContent ? `Assignment/Worksheet Content:\n${assignmentContent}\n` : ""}
+${assignmentContent ? `Assignment/Worksheet Content (may include Skills/Standards/TEKs):\n${assignmentContent}\n` : ""}
 ${customInstructions ? `Teacher's Instructions: ${customInstructions}\n` : ""}
 ${previousAnswers ? `Teacher's Preferences:\n${Object.entries(previousAnswers).map(([q, a]) => `- ${q}: ${a}`).join('\n')}\n` : ""}
 
 Create a detailed, age-appropriate rubric with:
 1. 4-6 evaluation categories appropriate for the assignment
-2. Clear, measurable criteria for each category
-3. Point values that total 100 points
-4. Grade-level appropriate language and expectations
+2. If Skills/Standards/TEKs were provided, align categories with those standards
+3. Clear, measurable criteria for each category
+4. Point values that total 100 points
+5. Grade-level appropriate language and expectations
 
 For ${gradeLevel}:
 - Use vocabulary and complexity suitable for the grade
@@ -148,7 +149,7 @@ Return a JSON object with this exact structure:
     }
   ],
   "totalPoints": 100,
-  "notes": "Any additional notes for the teacher"
+  "notes": "Any additional notes for the teacher, including which standards/skills this rubric addresses"
 }`;
 
     const rubricResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -160,7 +161,7 @@ Return a JSON object with this exact structure:
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: "You are an expert educator who creates comprehensive, age-appropriate rubrics. Return only valid JSON." },
+          { role: "system", content: "You are an expert educator who creates comprehensive, age-appropriate rubrics aligned with educational standards. Return only valid JSON." },
           { role: "user", content: rubricPrompt }
         ],
         temperature: 0.7,
