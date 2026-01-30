@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SolviaLogo from "@/components/SolviaLogo";
 import RoleSelector, { type SignupRole } from "@/components/auth/RoleSelector";
 import TeacherSignupFields from "@/components/auth/TeacherSignupFields";
+import PasswordRequirements, { validatePassword } from "@/components/auth/PasswordRequirements";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -54,10 +55,11 @@ const Auth = () => {
       return;
     }
 
-    if (password.length < 6) {
+    const passwordError = validatePassword(password);
+    if (passwordError) {
       toast({
         title: "Error",
-        description: "Password must be at least 6 characters",
+        description: passwordError,
         variant: "destructive",
       });
       return;
@@ -308,11 +310,9 @@ const Auth = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
                   required
-                  minLength={6}
+                  minLength={8}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Password must be at least 6 characters
-                </p>
+                <PasswordRequirements password={password} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-confirm-password">Confirm Password</Label>
