@@ -1,6 +1,6 @@
-import { GraduationCap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import solviaLogoImage from "@/assets/solvia-logo.png";
 
 interface SolviaLogoProps {
   size?: "sm" | "md" | "lg" | "xl";
@@ -10,35 +10,23 @@ interface SolviaLogoProps {
 }
 
 const sizeConfig = {
-  sm: { icon: 20, text: "text-lg" },
-  md: { icon: 28, text: "text-2xl" },
-  lg: { icon: 36, text: "text-3xl" },
-  xl: { icon: 48, text: "text-5xl" },
+  sm: { image: 32, text: "text-lg" },
+  md: { image: 48, text: "text-2xl" },
+  lg: { image: 64, text: "text-3xl" },
+  xl: { image: 96, text: "text-5xl" },
 };
 
-const SolviaLogo = ({ size = "md", showText = true, className, linkTo = "/" }: SolviaLogoProps) => {
+const SolviaLogo = ({ size = "md", showText = false, className, linkTo = "/" }: SolviaLogoProps) => {
   const config = sizeConfig[size];
 
   const logoContent = (
     <div className={cn("flex items-center gap-2", className)}>
-      <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-xl blur-sm opacity-50" />
-        <div className="relative p-2 bg-gradient-to-br from-primary to-accent rounded-xl">
-          <GraduationCap 
-            size={config.icon} 
-            className="text-primary-foreground" 
-            strokeWidth={2}
-          />
-        </div>
-      </div>
-      {showText && (
-        <span className={cn(
-          "font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent",
-          config.text
-        )}>
-          Solvia
-        </span>
-      )}
+      <img 
+        src={solviaLogoImage} 
+        alt="Solvia" 
+        style={{ height: config.image }}
+        className="object-contain"
+      />
     </div>
   );
 
