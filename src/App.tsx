@@ -25,6 +25,7 @@ import ParentPortfolio from "./pages/ParentPortfolio";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminAccommodationApprovals from "./pages/AdminAccommodationApprovals";
 import NotFound from "./pages/NotFound";
+import JoinClass from "./pages/JoinClass";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/join" element={<JoinClass />} />
+          <Route path="/join/:code" element={<JoinClass />} />
           
           {/* Student routes - require 'student' role */}
           <Route path="/student" element={

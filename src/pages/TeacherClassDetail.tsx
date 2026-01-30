@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Users, FileText, UserCircle, ArrowLeft, Plus, Upload, Key, Copy, Check, Trash2, BookOpen } from "lucide-react";
+import { Users, FileText, UserCircle, ArrowLeft, Plus, Upload, Key, Copy, Check, Trash2, BookOpen, Link } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -81,6 +81,7 @@ const TeacherClassDetail = () => {
   const [joinCode, setJoinCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   
   // Assignment drill-down state
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
@@ -256,6 +257,21 @@ const TeacherClassDetail = () => {
     }
   };
 
+  const getJoinLink = () => {
+    if (!joinCode) return "";
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/join/${joinCode}`;
+  };
+
+  const copyJoinLink = () => {
+    const link = getJoinLink();
+    if (link) {
+      navigator.clipboard.writeText(link);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    }
+  };
+
   const addStudent = async () => {
     if (!classId || !newStudentName || !newStudentEmail) return;
 
@@ -407,27 +423,51 @@ const TeacherClassDetail = () => {
           </div>
         </div>
 
-        {/* Join Code Card */}
+        {/* Join Code & Link Card */}
         <Card>
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Key className="w-5 h-5 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Class Join Code</p>
-                {joinCode ? (
-                  <p className="font-mono text-lg font-bold tracking-wider">{joinCode}</p>
-                ) : (
-                  <p className="text-muted-foreground italic">No code generated</p>
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              {/* Join Code Section */}
+              <div className="flex items-center gap-3 flex-1">
+                <Key className="w-5 h-5 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm text-muted-foreground">Class Join Code</p>
+                  {joinCode ? (
+                    <p className="font-mono text-lg font-bold tracking-wider">{joinCode}</p>
+                  ) : (
+                    <p className="text-muted-foreground italic">No code generated</p>
+                  )}
+                </div>
+                {joinCode && (
+                  <Button variant="outline" size="sm" onClick={copyJoinCode} className="shrink-0">
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    <span className="ml-1 hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
+                  </Button>
                 )}
               </div>
-            </div>
-            <div className="flex gap-2">
+
+              {/* Divider */}
               {joinCode && (
-                <Button variant="outline" size="sm" onClick={copyJoinCode}>
-                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </Button>
+                <div className="hidden md:block w-px h-12 bg-border" />
               )}
-              <Button size="sm" onClick={generateJoinCode}>
+
+              {/* Join Link Section */}
+              {joinCode && (
+                <div className="flex items-center gap-3 flex-1">
+                  <Link className="w-5 h-5 text-primary shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-muted-foreground">Join Link</p>
+                    <p className="text-sm font-medium truncate">{getJoinLink()}</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={copyJoinLink} className="shrink-0">
+                    {linkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    <span className="ml-1 hidden sm:inline">{linkCopied ? "Copied" : "Copy"}</span>
+                  </Button>
+                </div>
+              )}
+
+              {/* Generate Button */}
+              <Button size="sm" onClick={generateJoinCode} className="shrink-0">
                 {joinCode ? "Regenerate" : "Generate Code"}
               </Button>
             </div>
