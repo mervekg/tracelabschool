@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SolviaLogo from "@/components/SolviaLogo";
+import RoleSelector, { type SignupRole } from "@/components/auth/RoleSelector";
+import TeacherSignupFields from "@/components/auth/TeacherSignupFields";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -15,6 +17,10 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [signupRole, setSignupRole] = useState<SignupRole>("student");
+  const [teacherSubject, setTeacherSubject] = useState("");
+  const [teacherCustomSubject, setTeacherCustomSubject] = useState("");
+  const [teacherGradeLevel, setTeacherGradeLevel] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -66,10 +72,38 @@ const Auth = () => {
       return;
     }
 
+    // Validate teacher-specific fields
+    if (signupRole === "teacher") {
+      if (!teacherSubject) {
+        toast({
+          title: "Error",
+          description: "Please select the subject you teach",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (teacherSubject === "Other" && !teacherCustomSubject) {
+        toast({
+          title: "Error",
+          description: "Please specify your subject",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!teacherGradeLevel) {
+        toast({
+          title: "Error",
+          description: "Please select the grade level you teach",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     setLoading(true);
     const redirectUrl = `${window.location.origin}/`;
 
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -91,12 +125,44 @@ const Auth = () => {
           variant: "destructive",
         });
       }
-    } else {
-      toast({
-        title: "Success!",
-        description: "Account created successfully. You can now sign in.",
-      });
+      setLoading(false);
+      return;
     }
+
+    // If role is not student (default), update the role
+    if (signUpData.user && signupRole !== "student") {
+      // Update the role in user_roles table
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .update({ role: signupRole })
+        .eq("user_id", signUpData.user.id);
+
+      if (roleError) {
+        console.error("Error updating role:", roleError);
+      }
+
+      // If teacher, create teacher profile
+      if (signupRole === "teacher") {
+        const finalSubject = teacherSubject === "Other" ? teacherCustomSubject : teacherSubject;
+        const { error: teacherError } = await supabase
+          .from("teacher_profiles")
+          .insert({
+            user_id: signUpData.user.id,
+            subject: finalSubject,
+            custom_subject: teacherSubject === "Other" ? teacherCustomSubject : null,
+            grade_level: teacherGradeLevel,
+          });
+
+        if (teacherError) {
+          console.error("Error creating teacher profile:", teacherError);
+        }
+      }
+    }
+
+    toast({
+      title: "Success!",
+      description: "Account created successfully. You can now sign in.",
+    });
     setLoading(false);
   };
 
@@ -214,6 +280,12 @@ const Auth = () => {
 
           <TabsContent value="signup">
             <form onSubmit={handleSignUp} className="space-y-4">
+              <RoleSelector
+                role={signupRole}
+                setRole={setSignupRole}
+                disabled={loading}
+              />
+              
               <div className="space-y-2">
                 <Label htmlFor="signup-email">Email</Label>
                 <Input
@@ -255,6 +327,19 @@ const Auth = () => {
                   minLength={6}
                 />
               </div>
+
+              {signupRole === "teacher" && (
+                <TeacherSignupFields
+                  subject={teacherSubject}
+                  setSubject={setTeacherSubject}
+                  customSubject={teacherCustomSubject}
+                  setCustomSubject={setTeacherCustomSubject}
+                  gradeLevel={teacherGradeLevel}
+                  setGradeLevel={setTeacherGradeLevel}
+                  disabled={loading}
+                />
+              )}
+
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Creating account..." : "Sign Up"}
               </Button>

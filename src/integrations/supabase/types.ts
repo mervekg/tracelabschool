@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      classes: {
+        Row: {
+          color: string | null
+          created_at: string
+          grade_level: string
+          id: string
+          is_favorite: boolean | null
+          name: string
+          section: string
+          subject: string
+          teacher_id: string
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          grade_level: string
+          id?: string
+          is_favorite?: boolean | null
+          name: string
+          section: string
+          subject: string
+          teacher_id: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          grade_level?: string
+          id?: string
+          is_favorite?: boolean | null
+          name?: string
+          section?: string
+          subject?: string
+          teacher_id?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -35,6 +77,36 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      teacher_profiles: {
+        Row: {
+          created_at: string
+          custom_subject: string | null
+          grade_level: string
+          id: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_subject?: string | null
+          grade_level: string
+          id?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          custom_subject?: string | null
+          grade_level?: string
+          id?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
