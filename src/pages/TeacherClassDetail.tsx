@@ -1,0 +1,586 @@
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Users, FileText, UserCircle, ArrowLeft, Plus, Upload, Key, Copy, Check, Trash2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import TeacherLayout from "@/components/teacher/TeacherLayout";
+
+interface Student {
+  id: string;
+  email: string;
+  full_name: string;
+  status: string;
+  enrolled_at: string;
+}
+
+interface Parent {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  student_id: string | null;
+}
+
+interface ClassInfo {
+  id: string;
+  name: string;
+  subject: string;
+  section: string;
+  grade_level: string;
+}
+
+const TeacherClassDetail = () => {
+  const { classId } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  const [classInfo, setClassInfo] = useState<ClassInfo | null>(null);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [parents, setParents] = useState<Parent[]>([]);
+  const [joinCode, setJoinCode] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+  
+  // Add student dialog
+  const [addStudentOpen, setAddStudentOpen] = useState(false);
+  const [newStudentName, setNewStudentName] = useState("");
+  const [newStudentEmail, setNewStudentEmail] = useState("");
+  
+  // Add parent dialog
+  const [addParentOpen, setAddParentOpen] = useState(false);
+  const [newParentName, setNewParentName] = useState("");
+  const [newParentEmail, setNewParentEmail] = useState("");
+  const [newParentPhone, setNewParentPhone] = useState("");
+  const [selectedStudentId, setSelectedStudentId] = useState<string>("");
+  
+  // CSV upload
+  const [csvUploadOpen, setCsvUploadOpen] = useState(false);
+
+  useEffect(() => {
+    if (classId) {
+      fetchClassData();
+    }
+  }, [classId]);
+
+  const fetchClassData = async () => {
+    if (!classId) return;
+
+    // Fetch class info
+    const { data: classData, error: classError } = await supabase
+      .from("classes")
+      .select("*")
+      .eq("id", classId)
+      .single();
+
+    if (classError) {
+      toast({ title: "Error", description: "Failed to load class", variant: "destructive" });
+      navigate("/teacher");
+      return;
+    }
+
+    setClassInfo(classData);
+
+    // Fetch students
+    const { data: studentsData } = await supabase
+      .from("students")
+      .select("*")
+      .eq("class_id", classId)
+      .order("full_name");
+
+    setStudents(studentsData || []);
+
+    // Fetch parents
+    const { data: parentsData } = await supabase
+      .from("parents")
+      .select("*")
+      .eq("class_id", classId)
+      .order("full_name");
+
+    setParents(parentsData || []);
+
+    // Fetch join code
+    const { data: codeData } = await supabase
+      .from("class_join_codes")
+      .select("code")
+      .eq("class_id", classId)
+      .single();
+
+    setJoinCode(codeData?.code || null);
+    setLoading(false);
+  };
+
+  const generateJoinCode = async () => {
+    if (!classId) return;
+
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    const { error } = await supabase
+      .from("class_join_codes")
+      .upsert({
+        class_id: classId,
+        code,
+      }, { onConflict: "class_id" });
+
+    if (error) {
+      toast({ title: "Error", description: "Failed to generate code", variant: "destructive" });
+    } else {
+      setJoinCode(code);
+      toast({ title: "Success", description: "Join code generated!" });
+    }
+  };
+
+  const copyJoinCode = () => {
+    if (joinCode) {
+      navigator.clipboard.writeText(joinCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const addStudent = async () => {
+    if (!classId || !newStudentName || !newStudentEmail) return;
+
+    const { error } = await supabase
+      .from("students")
+      .insert({
+        class_id: classId,
+        full_name: newStudentName,
+        email: newStudentEmail,
+        status: "active",
+      });
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Success", description: "Student added!" });
+      setNewStudentName("");
+      setNewStudentEmail("");
+      setAddStudentOpen(false);
+      fetchClassData();
+    }
+  };
+
+  const removeStudent = async (studentId: string) => {
+    const { error } = await supabase
+      .from("students")
+      .delete()
+      .eq("id", studentId);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Success", description: "Student removed" });
+      fetchClassData();
+    }
+  };
+
+  const addParent = async () => {
+    if (!classId || !newParentName || !newParentEmail) return;
+
+    const { error } = await supabase
+      .from("parents")
+      .insert({
+        class_id: classId,
+        full_name: newParentName,
+        email: newParentEmail,
+        phone: newParentPhone || null,
+        student_id: selectedStudentId || null,
+      });
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Success", description: "Parent added!" });
+      setNewParentName("");
+      setNewParentEmail("");
+      setNewParentPhone("");
+      setSelectedStudentId("");
+      setAddParentOpen(false);
+      fetchClassData();
+    }
+  };
+
+  const removeParent = async (parentId: string) => {
+    const { error } = await supabase
+      .from("parents")
+      .delete()
+      .eq("id", parentId);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Success", description: "Parent removed" });
+      fetchClassData();
+    }
+  };
+
+  const handleCsvUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !classId) return;
+
+    const text = await file.text();
+    const lines = text.split("\n").filter(line => line.trim());
+    const headers = lines[0].toLowerCase().split(",").map(h => h.trim());
+    
+    const nameIdx = headers.findIndex(h => h.includes("name"));
+    const emailIdx = headers.findIndex(h => h.includes("email"));
+    const phoneIdx = headers.findIndex(h => h.includes("phone"));
+
+    if (nameIdx === -1 || emailIdx === -1) {
+      toast({ title: "Error", description: "CSV must have 'name' and 'email' columns", variant: "destructive" });
+      return;
+    }
+
+    const parentsToAdd = [];
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(",").map(v => v.trim().replace(/^"|"$/g, ""));
+      if (values[nameIdx] && values[emailIdx]) {
+        parentsToAdd.push({
+          class_id: classId,
+          full_name: values[nameIdx],
+          email: values[emailIdx],
+          phone: phoneIdx !== -1 ? values[phoneIdx] || null : null,
+        });
+      }
+    }
+
+    if (parentsToAdd.length === 0) {
+      toast({ title: "Error", description: "No valid parent records found", variant: "destructive" });
+      return;
+    }
+
+    const { error } = await supabase
+      .from("parents")
+      .insert(parentsToAdd);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Success", description: `${parentsToAdd.length} parents imported!` });
+      setCsvUploadOpen(false);
+      fetchClassData();
+    }
+  };
+
+  if (loading) {
+    return (
+      <TeacherLayout showSearch={false}>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </TeacherLayout>
+    );
+  }
+
+  return (
+    <TeacherLayout showSearch={false}>
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/teacher")}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">{classInfo?.name}</h1>
+            <p className="text-muted-foreground">
+              {classInfo?.subject} • {classInfo?.grade_level} • {classInfo?.section}
+            </p>
+          </div>
+        </div>
+
+        {/* Join Code Card */}
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Key className="w-5 h-5 text-primary" />
+              <div>
+                <p className="text-sm text-muted-foreground">Class Join Code</p>
+                {joinCode ? (
+                  <p className="font-mono text-lg font-bold tracking-wider">{joinCode}</p>
+                ) : (
+                  <p className="text-muted-foreground italic">No code generated</p>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {joinCode && (
+                <Button variant="outline" size="sm" onClick={copyJoinCode}>
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </Button>
+              )}
+              <Button size="sm" onClick={generateJoinCode}>
+                {joinCode ? "Regenerate" : "Generate Code"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tabs */}
+        <Tabs defaultValue="students" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3 max-w-md">
+            <TabsTrigger value="students" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Students ({students.length})
+            </TabsTrigger>
+            <TabsTrigger value="assignments" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Assignments
+            </TabsTrigger>
+            <TabsTrigger value="parents" className="flex items-center gap-2">
+              <UserCircle className="w-4 h-4" />
+              Parents ({parents.length})
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Students Tab */}
+          <TabsContent value="students" className="space-y-4">
+            <div className="flex justify-end">
+              <Dialog open={addStudentOpen} onOpenChange={setAddStudentOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Student
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add Student</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Full Name</Label>
+                      <Input
+                        value={newStudentName}
+                        onChange={(e) => setNewStudentName(e.target.value)}
+                        placeholder="John Doe"
+                      />
+                    </div>
+                    <div>
+                      <Label>Email</Label>
+                      <Input
+                        type="email"
+                        value={newStudentEmail}
+                        onChange={(e) => setNewStudentEmail(e.target.value)}
+                        placeholder="john@school.edu"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setAddStudentOpen(false)}>Cancel</Button>
+                    <Button onClick={addStudent}>Add Student</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Enrolled</TableHead>
+                    <TableHead className="w-16"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {students.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                        No students enrolled yet
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    students.map((student) => (
+                      <TableRow key={student.id}>
+                        <TableCell className="font-medium">{student.full_name}</TableCell>
+                        <TableCell>{student.email}</TableCell>
+                        <TableCell>
+                          <Badge variant={student.status === "active" ? "default" : "secondary"}>
+                            {student.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{new Date(student.enrolled_at).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => removeStudent(student.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+
+          {/* Assignments Tab */}
+          <TabsContent value="assignments" className="space-y-4">
+            <div className="flex justify-end">
+              <Button onClick={() => navigate(`/teacher/assignment-settings?classId=${classId}`)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Assignment
+              </Button>
+            </div>
+            <Card>
+              <CardContent className="p-8 text-center text-muted-foreground">
+                <FileText className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                <p>No assignments yet</p>
+                <p className="text-sm">Create your first assignment to get started</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Parents Tab */}
+          <TabsContent value="parents" className="space-y-4">
+            <div className="flex justify-end gap-2">
+              <Dialog open={csvUploadOpen} onOpenChange={setCsvUploadOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload CSV
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Upload Parent Contacts</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Upload a CSV file with columns: <strong>name</strong>, <strong>email</strong>, and optionally <strong>phone</strong>
+                    </p>
+                    <Input
+                      type="file"
+                      accept=".csv"
+                      onChange={handleCsvUpload}
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+              
+              <Dialog open={addParentOpen} onOpenChange={setAddParentOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Parent
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add Parent Contact</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Full Name</Label>
+                      <Input
+                        value={newParentName}
+                        onChange={(e) => setNewParentName(e.target.value)}
+                        placeholder="Jane Doe"
+                      />
+                    </div>
+                    <div>
+                      <Label>Email</Label>
+                      <Input
+                        type="email"
+                        value={newParentEmail}
+                        onChange={(e) => setNewParentEmail(e.target.value)}
+                        placeholder="jane@email.com"
+                      />
+                    </div>
+                    <div>
+                      <Label>Phone (optional)</Label>
+                      <Input
+                        value={newParentPhone}
+                        onChange={(e) => setNewParentPhone(e.target.value)}
+                        placeholder="+1 234 567 8900"
+                      />
+                    </div>
+                    <div>
+                      <Label>Link to Student (optional)</Label>
+                      <select
+                        className="w-full h-10 px-3 border rounded-md bg-background"
+                        value={selectedStudentId}
+                        onChange={(e) => setSelectedStudentId(e.target.value)}
+                      >
+                        <option value="">-- Select Student --</option>
+                        {students.map((s) => (
+                          <option key={s.id} value={s.id}>{s.full_name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setAddParentOpen(false)}>Cancel</Button>
+                    <Button onClick={addParent}>Add Parent</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Linked Student</TableHead>
+                    <TableHead className="w-16"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {parents.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                        No parent contacts yet
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    parents.map((parent) => (
+                      <TableRow key={parent.id}>
+                        <TableCell className="font-medium">{parent.full_name}</TableCell>
+                        <TableCell>{parent.email}</TableCell>
+                        <TableCell>{parent.phone || "-"}</TableCell>
+                        <TableCell>
+                          {parent.student_id
+                            ? students.find((s) => s.id === parent.student_id)?.full_name || "-"
+                            : "-"}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => removeParent(parent.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </TeacherLayout>
+  );
+};
+
+export default TeacherClassDetail;

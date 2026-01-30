@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
-import { Users, FileCheck, AlertCircle, TrendingUp, BookOpen, Calendar, Shield, Search } from "lucide-react";
+import { Users, FileCheck, AlertCircle, TrendingUp, BookOpen, Calendar, Shield } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
-import SolviaLogo from "@/components/SolviaLogo";
 import CourseCard from "@/components/CourseCard";
 import CreateClassDialog from "@/components/CreateClassDialog";
 import { supabase } from "@/integrations/supabase/client";
-
+import TeacherLayout from "@/components/teacher/TeacherLayout";
 interface Course {
   id: string;
   title: string;
@@ -126,47 +124,11 @@ const TeacherDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen paper-texture">
-      {/* Top Navigation Bar */}
-      <header className="bg-background border-b border-border px-6 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <SolviaLogo size="md" showText={true} />
-            <nav className="hidden md:flex items-center gap-4">
-              <Button variant="ghost" className="font-medium">Courses</Button>
-              <Button variant="ghost" className="text-muted-foreground">Groups</Button>
-              <Button variant="ghost" className="text-muted-foreground">Resources</Button>
-            </nav>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search courses..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-64"
-              />
-            </div>
-            <Button 
-              variant="outline"
-              onClick={() => navigate('/teacher/accommodations')}
-            >
-              Accommodations
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => navigate('/teacher/violation-reports')}
-              className="border-destructive/50 hover:bg-destructive/10"
-            >
-              <Shield className="w-4 h-4 mr-2" />
-              Violations
-            </Button>
-          </div>
-        </div>
-      </header>
-
+    <TeacherLayout 
+      searchQuery={searchQuery} 
+      onSearchChange={setSearchQuery}
+      showSearch={true}
+    >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Quick Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -244,7 +206,7 @@ const TeacherDashboard = () => {
                   color={course.color}
                   onThumbnailChange={handleThumbnailChange}
                   onFavoriteToggle={handleFavoriteToggle}
-                  onClick={() => navigate('/teacher/review')}
+                  onClick={() => navigate(`/teacher/class/${course.id}`)}
                 />
               ))}
             </div>
@@ -279,7 +241,7 @@ const TeacherDashboard = () => {
           </div>
         </Card>
       </div>
-    </div>
+    </TeacherLayout>
   );
 };
 
