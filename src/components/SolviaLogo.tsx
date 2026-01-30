@@ -4,27 +4,27 @@ import solviaLogoImage from "@/assets/solvia-logo.png";
 
 interface SolviaLogoProps {
   size?: "sm" | "md" | "lg" | "xl";
-  showText?: boolean;
+  showText?: boolean; // Kept for backwards compatibility, but ignored since logo includes text
   className?: string;
   linkTo?: string;
 }
 
 const sizeConfig = {
-  sm: { image: 32, text: "text-lg" },
-  md: { image: 48, text: "text-2xl" },
-  lg: { image: 64, text: "text-3xl" },
-  xl: { image: 96, text: "text-5xl" },
+  sm: { height: 40 },
+  md: { height: 56 },
+  lg: { height: 72 },
+  xl: { height: 120 },
 };
 
-const SolviaLogo = ({ size = "md", showText = false, className, linkTo = "/" }: SolviaLogoProps) => {
+const SolviaLogo = ({ size = "md", className, linkTo = "/" }: SolviaLogoProps) => {
   const config = sizeConfig[size];
 
   const logoContent = (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center", className)}>
       <img 
         src={solviaLogoImage} 
-        alt="Solvia" 
-        style={{ height: config.image }}
+        alt="Solvia - Educational Assessment Platform" 
+        style={{ height: config.height }}
         className="object-contain"
       />
     </div>
