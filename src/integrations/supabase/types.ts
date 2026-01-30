@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      class_join_codes: {
+        Row: {
+          class_id: string
+          code: string
+          created_at: string
+          expires_at: string | null
+          id: string
+        }
+        Insert: {
+          class_id: string
+          code: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+        }
+        Update: {
+          class_id?: string
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_join_codes_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: true
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       classes: {
         Row: {
           color: string | null
@@ -56,6 +88,101 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          body: string
+          class_id: string | null
+          created_at: string
+          id: string
+          is_email_sent: boolean
+          is_read: boolean
+          recipient_email: string | null
+          recipient_id: string | null
+          sender_id: string
+          subject: string
+        }
+        Insert: {
+          body: string
+          class_id?: string | null
+          created_at?: string
+          id?: string
+          is_email_sent?: boolean
+          is_read?: boolean
+          recipient_email?: string | null
+          recipient_id?: string | null
+          sender_id: string
+          subject: string
+        }
+        Update: {
+          body?: string
+          class_id?: string | null
+          created_at?: string
+          id?: string
+          is_email_sent?: boolean
+          is_read?: boolean
+          recipient_email?: string | null
+          recipient_id?: string | null
+          sender_id?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parents: {
+        Row: {
+          class_id: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string | null
+          student_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          student_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          student_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parents_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parents_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -79,6 +206,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      students: {
+        Row: {
+          class_id: string
+          email: string
+          enrolled_at: string
+          full_name: string
+          id: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          class_id: string
+          email: string
+          enrolled_at?: string
+          full_name: string
+          id?: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          class_id?: string
+          email?: string
+          enrolled_at?: string
+          full_name?: string
+          id?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       teacher_profiles: {
         Row: {

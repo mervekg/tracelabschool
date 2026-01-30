@@ -11,6 +11,9 @@ import StudentWorkspace from "./pages/StudentWorkspace";
 import StudentAnalysis from "./pages/StudentAnalysis";
 import StudentFeedback from "./pages/StudentFeedback";
 import TeacherDashboard from "./pages/TeacherDashboard";
+import TeacherClassDetail from "./pages/TeacherClassDetail";
+import TeacherMessages from "./pages/TeacherMessages";
+import TeacherContactParents from "./pages/TeacherContactParents";
 import TeacherReview from "./pages/TeacherReview";
 import TeacherAccommodations from "./pages/TeacherAccommodations";
 import TeacherAssignmentSettings from "./pages/TeacherAssignmentSettings";
@@ -60,6 +63,21 @@ const App = () => (
           <Route path="/teacher" element={
             <ProtectedRoute requiredRole="teacher">
               <TeacherDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/teacher/class/:classId" element={
+            <ProtectedRoute requiredRole="teacher">
+              <TeacherClassDetail />
+            </ProtectedRoute>
+          } />
+          <Route path="/teacher/messages" element={
+            <ProtectedRoute requiredRole="teacher">
+              <TeacherMessages />
+            </ProtectedRoute>
+          } />
+          <Route path="/teacher/contact-parents" element={
+            <ProtectedRoute requiredRole="teacher">
+              <TeacherContactParents />
             </ProtectedRoute>
           } />
           <Route path="/teacher/review" element={
