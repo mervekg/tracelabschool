@@ -47,6 +47,9 @@ interface Assignment {
   due_date: string | null;
   created_at: string;
   submission_count?: number;
+  pdf_url?: string | null;
+  external_link?: string | null;
+  assignment_type?: string | null;
 }
 
 interface StudentSubmission {
@@ -540,6 +543,7 @@ const TeacherClassDetail = () => {
             {selectedSubmission && selectedAssignment ? (
               <SubmissionReview
                 submission={selectedSubmission}
+                assignmentTitle={selectedAssignment.title}
                 onBack={handleBackToSubmissions}
                 onUpdate={handleSubmissionUpdate}
               />

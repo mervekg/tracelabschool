@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Bot, User, Save, Sparkles } from "lucide-react";
+import { ArrowLeft, Bot, User, Save, Sparkles, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,16 +27,62 @@ interface StudentSubmission {
 
 interface SubmissionReviewProps {
   submission: StudentSubmission;
+  assignmentTitle?: string;
   onBack: () => void;
   onUpdate: () => void;
 }
 
-const SubmissionReview = ({ submission, onBack, onUpdate }: SubmissionReviewProps) => {
+const SubmissionReview = ({ submission, assignmentTitle, onBack, onUpdate }: SubmissionReviewProps) => {
   const { toast } = useToast();
   const [teacherFeedback, setTeacherFeedback] = useState(submission.teacher_feedback || "");
   const [score, setScore] = useState(submission.score?.toString() || "");
   const [saving, setSaving] = useState(false);
   const [generatingAI, setGeneratingAI] = useState(false);
+
+  const downloadSubmission = () => {
+    const studentName = submission.student?.full_name || "Unknown";
+    const content = [];
+    
+    content.push(`Student: ${studentName}`);
+    if (assignmentTitle) content.push(`Assignment: ${assignmentTitle}`);
+    content.push(`Status: ${submission.status}`);
+    content.push(`Submitted: ${submission.submitted_at ? new Date(submission.submitted_at).toLocaleString() : "Not submitted"}`);
+    content.push("");
+    
+    if (submission.content) {
+      content.push("=== Student Response ===");
+      content.push(submission.content);
+      content.push("");
+    }
+    
+    if (submission.ai_feedback) {
+      content.push("=== AI Feedback ===");
+      content.push(submission.ai_feedback);
+      content.push("");
+    }
+    
+    if (teacherFeedback) {
+      content.push("=== Teacher Feedback ===");
+      content.push(teacherFeedback);
+      content.push("");
+    }
+    
+    if (score) {
+      content.push(`Score: ${score}`);
+    }
+
+    const blob = new Blob([content.join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${studentName.replace(/\s+/g, "_")}_submission.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({ title: "Downloaded", description: "Submission downloaded successfully" });
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -117,9 +163,15 @@ Note: This is placeholder feedback. Connect to an AI service for real analysis.`
             </p>
           </div>
         </div>
-        <Badge variant={submission.status === "reviewed" ? "default" : "secondary"}>
-          {submission.status}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={downloadSubmission}>
+            <Download className="w-4 h-4 mr-1" />
+            Download
+          </Button>
+          <Badge variant={submission.status === "reviewed" ? "default" : "secondary"}>
+            {submission.status}
+          </Badge>
+        </div>
       </div>
 
       {/* Student Content */}
