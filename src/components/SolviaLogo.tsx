@@ -1,10 +1,12 @@
 import { GraduationCap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 interface SolviaLogoProps {
   size?: "sm" | "md" | "lg" | "xl";
   showText?: boolean;
   className?: string;
+  linkTo?: string;
 }
 
 const sizeConfig = {
@@ -14,10 +16,10 @@ const sizeConfig = {
   xl: { icon: 48, text: "text-5xl" },
 };
 
-const SolviaLogo = ({ size = "md", showText = true, className }: SolviaLogoProps) => {
+const SolviaLogo = ({ size = "md", showText = true, className, linkTo = "/" }: SolviaLogoProps) => {
   const config = sizeConfig[size];
 
-  return (
+  const logoContent = (
     <div className={cn("flex items-center gap-2", className)}>
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-xl blur-sm opacity-50" />
@@ -39,6 +41,16 @@ const SolviaLogo = ({ size = "md", showText = true, className }: SolviaLogoProps
       )}
     </div>
   );
+
+  if (linkTo) {
+    return (
+      <Link to={linkTo} className="hover:opacity-90 transition-opacity">
+        {logoContent}
+      </Link>
+    );
+  }
+
+  return logoContent;
 };
 
 export default SolviaLogo;
