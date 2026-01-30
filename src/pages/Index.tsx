@@ -6,10 +6,14 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import SolviaLogo from "@/components/SolviaLogo";
+import AddParentsDialog from "@/components/AddParentsDialog";
+import { toast } from "sonner";
 
 const Index = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
+  const [showAddParentsDialog, setShowAddParentsDialog] = useState(false);
+  const [isAddingParents, setIsAddingParents] = useState(false);
 
   useEffect(() => {
     // Check current session
@@ -27,6 +31,27 @@ const Index = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+  };
+
+  const handleParentCardClick = () => {
+    // Show dialog with options instead of navigating directly
+    setShowAddParentsDialog(true);
+  };
+
+  const handleAddParents = async (parents: Array<{ fullName: string; email: string; phone?: string; studentName?: string }>) => {
+    // For now, just show success and close - actual DB integration would need a class_id
+    setIsAddingParents(true);
+    try {
+      // This would typically insert into the parents table with a class_id
+      // For demonstration, we'll show the data that would be added
+      toast.success(`${parents.length} parent(s) ready to be added. Select a class to complete.`);
+      setShowAddParentsDialog(false);
+      navigate("/teacher"); // Navigate to teacher dashboard to select a class
+    } catch (error) {
+      toast.error("Failed to add parents");
+    } finally {
+      setIsAddingParents(false);
+    }
   };
 
   const roles = [
@@ -50,6 +75,7 @@ const Index = () => {
       icon: Heart,
       gradient: "from-green-400 to-emerald-400",
       path: "/parent",
+      customAction: handleParentCardClick,
     },
     {
       title: "Admin",
@@ -102,7 +128,7 @@ const Index = () => {
             <Card
               key={role.title}
               className="p-6 paper-texture shadow-paper hover:shadow-card transition-all cursor-pointer group"
-              onClick={() => navigate(role.path)}
+              onClick={() => role.customAction ? role.customAction() : navigate(role.path)}
             >
               <div className="space-y-4">
                 <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${role.gradient} flex items-center justify-center group-hover:scale-110 transition-transform`}>
@@ -122,6 +148,14 @@ const Index = () => {
             </Card>
           ))}
         </div>
+
+        {/* Add Parents Dialog */}
+        <AddParentsDialog
+          open={showAddParentsDialog}
+          onOpenChange={setShowAddParentsDialog}
+          onSubmit={handleAddParents}
+          isLoading={isAddingParents}
+        />
 
         {/* Features Highlight */}
         <Card className="p-8 shadow-card bg-gradient-to-br from-accent/5 to-primary/5 border-primary/20">
