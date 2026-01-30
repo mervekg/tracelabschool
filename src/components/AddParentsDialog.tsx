@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserPlus, ClipboardPaste, Plus, Trash2, Upload } from "lucide-react";
+import { UserPlus, ClipboardPaste, Plus, Trash2, Upload, FileUp, X, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 
 interface Parent {
@@ -34,6 +34,9 @@ const AddParentsDialog = ({ open, onOpenChange, onSubmit, isLoading }: AddParent
   ]);
   const [bulkText, setBulkText] = useState("");
   const [activeTab, setActiveTab] = useState("manual");
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [parsedFromFile, setParsedFromFile] = useState<Parent[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const addManualRow = () => {
     setManualParents([...manualParents, { fullName: "", email: "", phone: "", studentName: "" }]);
@@ -51,29 +54,73 @@ const AddParentsDialog = ({ open, onOpenChange, onSubmit, isLoading }: AddParent
     setManualParents(updated);
   };
 
-  const parseBulkText = (): Parent[] => {
-    const lines = bulkText.trim().split("\n").filter(line => line.trim());
+  const parseCSVText = (text: string): Parent[] => {
+    const lines = text.trim().split("\n").filter(line => line.trim());
     const parents: Parent[] = [];
 
-    for (const line of lines) {
-      // Support formats: 
-      // name,email,phone,studentName
-      // name,email,phone
-      // name,email
-      // Or tab-separated
+    // Check if first line is a header
+    const firstLine = lines[0]?.toLowerCase() || "";
+    const hasHeader = firstLine.includes("name") || firstLine.includes("email");
+    const startIndex = hasHeader ? 1 : 0;
+
+    for (let i = startIndex; i < lines.length; i++) {
+      const line = lines[i];
+      // Support formats: comma or tab separated
       const parts = line.includes("\t") ? line.split("\t") : line.split(",");
       
       if (parts.length >= 2) {
         parents.push({
-          fullName: parts[0].trim(),
-          email: parts[1].trim(),
-          phone: parts[2]?.trim() || "",
-          studentName: parts[3]?.trim() || ""
+          fullName: parts[0].trim().replace(/^["']|["']$/g, ''),
+          email: parts[1].trim().replace(/^["']|["']$/g, ''),
+          phone: parts[2]?.trim().replace(/^["']|["']$/g, '') || "",
+          studentName: parts[3]?.trim().replace(/^["']|["']$/g, '') || ""
         });
       }
     }
 
     return parents;
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv') && !file.name.endsWith('.txt')) {
+      toast.error("Please upload a CSV or TXT file");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const parsed = parseCSVText(text);
+      
+      if (parsed.length === 0) {
+        toast.error("No valid parent data found in file");
+        return;
+      }
+
+      setUploadedFile(file);
+      setParsedFromFile(parsed);
+      toast.success(`Found ${parsed.length} parent(s) in file`);
+    };
+    reader.onerror = () => {
+      toast.error("Failed to read file");
+    };
+    reader.readAsText(file);
+  };
+
+  const clearUploadedFile = () => {
+    setUploadedFile(null);
+    setParsedFromFile([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleSubmit = () => {
@@ -85,12 +132,18 @@ const AddParentsDialog = ({ open, onOpenChange, onSubmit, isLoading }: AddParent
         toast.error("Please fill in at least one parent with name and email");
         return;
       }
-    } else {
-      parentsToSubmit = parseBulkText();
+    } else if (activeTab === "paste") {
+      parentsToSubmit = parseCSVText(bulkText);
       if (parentsToSubmit.length === 0) {
         toast.error("No valid parent data found. Use format: Name, Email, Phone (optional), Student Name (optional)");
         return;
       }
+    } else if (activeTab === "upload") {
+      if (parsedFromFile.length === 0) {
+        toast.error("Please upload a CSV file first");
+        return;
+      }
+      parentsToSubmit = parsedFromFile;
     }
 
     // Validate emails
@@ -108,8 +161,11 @@ const AddParentsDialog = ({ open, onOpenChange, onSubmit, isLoading }: AddParent
     setManualParents([{ fullName: "", email: "", phone: "", studentName: "" }]);
     setBulkText("");
     setActiveTab("manual");
+    clearUploadedFile();
     onOpenChange(false);
   };
+
+  const parsedBulkParents = parseCSVText(bulkText);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -120,19 +176,23 @@ const AddParentsDialog = ({ open, onOpenChange, onSubmit, isLoading }: AddParent
             Add Parents
           </DialogTitle>
           <DialogDescription>
-            Add parent contact information manually or paste a list from a spreadsheet.
+            Add parent contact information manually, paste a list, or upload a CSV file.
           </DialogDescription>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="manual" className="flex items-center gap-2">
               <UserPlus className="w-4 h-4" />
-              Manual Entry
+              Manual
             </TabsTrigger>
-            <TabsTrigger value="bulk" className="flex items-center gap-2">
+            <TabsTrigger value="paste" className="flex items-center gap-2">
               <ClipboardPaste className="w-4 h-4" />
-              Paste List
+              Paste
+            </TabsTrigger>
+            <TabsTrigger value="upload" className="flex items-center gap-2">
+              <FileUp className="w-4 h-4" />
+              Upload CSV
             </TabsTrigger>
           </TabsList>
 
@@ -194,7 +254,7 @@ const AddParentsDialog = ({ open, onOpenChange, onSubmit, isLoading }: AddParent
             </Button>
           </TabsContent>
 
-          <TabsContent value="bulk" className="space-y-4 mt-4">
+          <TabsContent value="paste" className="space-y-4 mt-4">
             <div className="space-y-2">
               <Label>Paste parent data from spreadsheet</Label>
               <Textarea
@@ -216,20 +276,102 @@ Jane Doe, jane@email.com`}
             {bulkText && (
               <div className="p-3 bg-muted/50 rounded-lg">
                 <p className="text-sm font-medium">
-                  Preview: {parseBulkText().length} parent(s) detected
+                  Preview: {parsedBulkParents.length} parent(s) detected
                 </p>
-                {parseBulkText().slice(0, 3).map((p, i) => (
+                {parsedBulkParents.slice(0, 3).map((p, i) => (
                   <p key={i} className="text-xs text-muted-foreground">
                     {p.fullName} ({p.email})
                   </p>
                 ))}
-                {parseBulkText().length > 3 && (
+                {parsedBulkParents.length > 3 && (
                   <p className="text-xs text-muted-foreground">
-                    ...and {parseBulkText().length - 3} more
+                    ...and {parsedBulkParents.length - 3} more
                   </p>
                 )}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="upload" className="space-y-4 mt-4">
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv,.txt"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="csv-upload"
+                />
+                
+                {!uploadedFile ? (
+                  <label
+                    htmlFor="csv-upload"
+                    className="cursor-pointer flex flex-col items-center gap-3"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                      <FileSpreadsheet className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Click to upload CSV file</p>
+                      <p className="text-sm text-muted-foreground">
+                        or drag and drop (max 5MB)
+                      </p>
+                    </div>
+                    <Button variant="outline" type="button" asChild>
+                      <span>
+                        <FileUp className="w-4 h-4 mr-2" />
+                        Select File
+                      </span>
+                    </Button>
+                  </label>
+                ) : (
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <FileSpreadsheet className="w-8 h-8 text-primary" />
+                      <div className="text-left">
+                        <p className="font-medium">{uploadedFile.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {parsedFromFile.length} parent(s) found
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={clearUploadedFile}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p className="font-medium">CSV Format:</p>
+                <p>Full Name, Email, Phone (optional), Student Name (optional)</p>
+                <p className="text-xs">Header row is automatically detected and skipped.</p>
+              </div>
+
+              {parsedFromFile.length > 0 && (
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="text-sm font-medium mb-2">Preview:</p>
+                  <div className="space-y-1">
+                    {parsedFromFile.slice(0, 5).map((p, i) => (
+                      <p key={i} className="text-xs text-muted-foreground">
+                        {p.fullName} ({p.email}){p.phone && ` - ${p.phone}`}
+                      </p>
+                    ))}
+                    {parsedFromFile.length > 5 && (
+                      <p className="text-xs text-muted-foreground">
+                        ...and {parsedFromFile.length - 5} more
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
 
