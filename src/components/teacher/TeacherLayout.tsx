@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import SolviaLogo from "@/components/SolviaLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import LanguageSelector from "@/components/LanguageSelector";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -153,6 +154,9 @@ const TeacherLayout = ({
                 <Shield className="w-4 h-4 mr-1" />
                 Violations
               </Button>
+              
+              {/* Language Selector - Desktop */}
+              <LanguageSelector variant="icon" />
             </div>
 
             {/* Messages Icon - Mobile */}
@@ -263,6 +267,10 @@ const TeacherLayout = ({
                 <Shield className="w-4 h-4 mr-1" />
                 Violations
               </Button>
+            </div>
+            {/* Language Selector - Mobile */}
+            <div className="pt-2 border-t border-border">
+              <LanguageSelector variant="full" className="w-full justify-start" />
             </div>
           </div>
         )}
