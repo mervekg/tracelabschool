@@ -12,6 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import TeacherLayout from "@/components/teacher/TeacherLayout";
+import AssignmentsList from "@/components/teacher/AssignmentsList";
+import StudentSubmissionsList from "@/components/teacher/StudentSubmissionsList";
+import SubmissionReview from "@/components/teacher/SubmissionReview";
 
 interface Student {
   id: string;
@@ -37,6 +40,31 @@ interface ClassInfo {
   grade_level: string;
 }
 
+interface Assignment {
+  id: string;
+  title: string;
+  description: string | null;
+  due_date: string | null;
+  created_at: string;
+  submission_count?: number;
+}
+
+interface StudentSubmission {
+  id: string;
+  student_id: string;
+  content: string | null;
+  handwriting_image_url: string | null;
+  status: string;
+  submitted_at: string | null;
+  ai_feedback: string | null;
+  teacher_feedback: string | null;
+  score: number | null;
+  student?: {
+    full_name: string;
+    email: string;
+  };
+}
+
 const TeacherClassDetail = () => {
   const { classId } = useParams();
   const navigate = useNavigate();
@@ -45,9 +73,15 @@ const TeacherClassDetail = () => {
   const [classInfo, setClassInfo] = useState<ClassInfo | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [parents, setParents] = useState<Parent[]>([]);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [joinCode, setJoinCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  
+  // Assignment drill-down state
+  const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
+  const [submissions, setSubmissions] = useState<StudentSubmission[]>([]);
+  const [selectedSubmission, setSelectedSubmission] = useState<StudentSubmission | null>(null);
   
   // Add student dialog
   const [addStudentOpen, setAddStudentOpen] = useState(false);
@@ -106,6 +140,27 @@ const TeacherClassDetail = () => {
 
     setParents(parentsData || []);
 
+    // Fetch assignments with submission counts
+    const { data: assignmentsData } = await supabase
+      .from("assignments")
+      .select("*")
+      .eq("class_id", classId)
+      .order("created_at", { ascending: false });
+
+    // Get submission counts for each assignment
+    if (assignmentsData) {
+      const assignmentsWithCounts = await Promise.all(
+        assignmentsData.map(async (assignment) => {
+          const { count } = await supabase
+            .from("student_submissions")
+            .select("*", { count: "exact", head: true })
+            .eq("assignment_id", assignment.id);
+          return { ...assignment, submission_count: count || 0 };
+        })
+      );
+      setAssignments(assignmentsWithCounts);
+    }
+
     // Fetch join code
     const { data: codeData } = await supabase
       .from("class_join_codes")
@@ -115,6 +170,58 @@ const TeacherClassDetail = () => {
 
     setJoinCode(codeData?.code || null);
     setLoading(false);
+  };
+
+  const fetchSubmissionsForAssignment = async (assignmentId: string) => {
+    const { data } = await supabase
+      .from("student_submissions")
+      .select("*")
+      .eq("assignment_id", assignmentId)
+      .order("submitted_at", { ascending: false });
+
+    // Enrich with student info
+    if (data) {
+      const enrichedSubmissions = await Promise.all(
+        data.map(async (sub) => {
+          const student = students.find((s) => s.id === sub.student_id);
+          return {
+            ...sub,
+            student: student ? { full_name: student.full_name, email: student.email } : undefined,
+          };
+        })
+      );
+      setSubmissions(enrichedSubmissions);
+    }
+  };
+
+  const handleSelectAssignment = async (assignment: Assignment) => {
+    setSelectedAssignment(assignment);
+    setSelectedSubmission(null);
+    await fetchSubmissionsForAssignment(assignment.id);
+  };
+
+  const handleBackToAssignments = () => {
+    setSelectedAssignment(null);
+    setSubmissions([]);
+  };
+
+  const handleSelectSubmission = (submission: StudentSubmission) => {
+    setSelectedSubmission(submission);
+  };
+
+  const handleBackToSubmissions = () => {
+    setSelectedSubmission(null);
+  };
+
+  const handleSubmissionUpdate = async () => {
+    if (selectedAssignment) {
+      await fetchSubmissionsForAssignment(selectedAssignment.id);
+      // Re-fetch to get updated submission
+      const updatedSub = submissions.find((s) => s.id === selectedSubmission?.id);
+      if (updatedSub) {
+        setSelectedSubmission(updatedSub);
+      }
+    }
   };
 
   const generateJoinCode = async () => {
@@ -430,19 +537,27 @@ const TeacherClassDetail = () => {
 
           {/* Assignments Tab */}
           <TabsContent value="assignments" className="space-y-4">
-            <div className="flex justify-end">
-              <Button onClick={() => navigate(`/teacher/assignment-settings?classId=${classId}`)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Assignment
-              </Button>
-            </div>
-            <Card>
-              <CardContent className="p-8 text-center text-muted-foreground">
-                <FileText className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                <p>No assignments yet</p>
-                <p className="text-sm">Create your first assignment to get started</p>
-              </CardContent>
-            </Card>
+            {selectedSubmission && selectedAssignment ? (
+              <SubmissionReview
+                submission={selectedSubmission}
+                onBack={handleBackToSubmissions}
+                onUpdate={handleSubmissionUpdate}
+              />
+            ) : selectedAssignment ? (
+              <StudentSubmissionsList
+                assignment={selectedAssignment}
+                submissions={submissions}
+                onBack={handleBackToAssignments}
+                onSelectSubmission={handleSelectSubmission}
+              />
+            ) : (
+              <AssignmentsList
+                classId={classId!}
+                assignments={assignments}
+                onRefresh={fetchClassData}
+                onSelectAssignment={handleSelectAssignment}
+              />
+            )}
           </TabsContent>
 
           {/* Parents Tab */}
