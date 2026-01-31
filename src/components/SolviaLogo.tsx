@@ -10,10 +10,10 @@ interface SolviaLogoProps {
 }
 
 const sizeConfig = {
-  sm: { height: 48 },
-  md: { height: 64 },
-  lg: { height: 88 },
-  xl: { height: 140 },
+  sm: { height: 36 },
+  md: { height: 48 },
+  lg: { height: 64 },
+  xl: { height: 80 },
 };
 
 const SolviaLogo = ({ size = "md", className, linkTo = "/" }: SolviaLogoProps) => {
