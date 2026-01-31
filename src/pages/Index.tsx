@@ -51,16 +51,16 @@ const Index = () => {
 
   const roles = [
     {
-      title: "A Learner",
-      subtitle: "(Student)",
+      title: "A Student",
+      subtitle: "(Learner)",
       icon: BookOpen,
       path: "/student",
       color: "bg-primary/10 text-primary border-primary/20",
       iconBg: "bg-gradient-to-br from-primary/20 to-accent",
     },
     {
-      title: "An Educator",
-      subtitle: "(Teacher)",
+      title: "A Teacher",
+      subtitle: "(Mentor / Educator)",
       icon: ClipboardList,
       path: "/teacher",
       color: "bg-secondary/10 text-secondary border-secondary/20",
