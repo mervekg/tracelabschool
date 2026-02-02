@@ -2,7 +2,7 @@ import { User, TrendingUp, Calendar, MessageSquare, Award, BookOpen } from "luci
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import SolviaLogo from "@/components/SolviaLogo";
+import TraceLabLogo from "@/components/TraceLabLogo";
 
 const ParentDashboard = () => {
   const childProgress = {
@@ -27,7 +27,7 @@ const ParentDashboard = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <SolviaLogo size="lg" showText={false} />
+            <TraceLabLogo size="lg" showText={false} />
             <div>
               <h1 className="text-4xl font-bold text-primary mb-2">Parent Portal</h1>
               <p className="text-muted-foreground">Welcome back! Here's {childProgress.name}'s progress</p>

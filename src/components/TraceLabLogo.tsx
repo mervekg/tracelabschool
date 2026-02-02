@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import solviaLogoImage from "@/assets/solvia-logo.png";
+import traceLabLogoImage from "@/assets/solvia-logo.png";
 
-interface SolviaLogoProps {
+interface TraceLabLogoProps {
   size?: "sm" | "md" | "lg" | "xl";
   showText?: boolean; // Kept for backwards compatibility, but ignored since logo includes text
   className?: string;
@@ -16,14 +16,14 @@ const sizeConfig = {
   xl: { height: 80 },
 };
 
-const SolviaLogo = ({ size = "md", className, linkTo = "/" }: SolviaLogoProps) => {
+const TraceLabLogo = ({ size = "md", className, linkTo = "/" }: TraceLabLogoProps) => {
   const config = sizeConfig[size];
 
   const logoContent = (
     <div className={cn("flex items-center", className)}>
       <img 
-        src={solviaLogoImage} 
-        alt="Solvia - Educational Assessment Platform" 
+        src={traceLabLogoImage} 
+        alt="TraceLab - Educational Assessment Platform" 
         style={{ height: config.height }}
         className="object-contain"
       />
@@ -41,4 +41,4 @@ const SolviaLogo = ({ size = "md", className, linkTo = "/" }: SolviaLogoProps) =
   return logoContent;
 };
 
-export default SolviaLogo;
+export default TraceLabLogo;
