@@ -65,7 +65,6 @@ interface StudentSubmission {
   score: number | null;
   student?: {
     full_name: string;
-    email: string;
   };
 }
 
@@ -191,7 +190,7 @@ const TeacherClassDetail = () => {
           const student = students.find((s) => s.id === sub.student_id);
           return {
             ...sub,
-            student: student ? { full_name: student.full_name, email: student.email } : undefined,
+            student: student ? { full_name: student.full_name } : undefined,
           };
         })
       );
@@ -541,7 +540,7 @@ const TeacherClassDetail = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
+                    <TableHead>Student ID</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Enrolled</TableHead>
                     <TableHead className="w-16"></TableHead>
@@ -555,10 +554,10 @@ const TeacherClassDetail = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    students.map((student) => (
+                    students.map((student, index) => (
                       <TableRow key={student.id}>
                         <TableCell className="font-medium">{student.full_name}</TableCell>
-                        <TableCell>{student.email}</TableCell>
+                        <TableCell className="text-muted-foreground">#{index + 1}</TableCell>
                         <TableCell>
                           <Badge variant={student.status === "active" ? "default" : "secondary"}>
                             {student.status}

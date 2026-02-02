@@ -17,7 +17,6 @@ interface StudentSubmission {
   handwriting_image_url?: string | null;
   student?: {
     full_name: string;
-    email: string;
   };
 }
 

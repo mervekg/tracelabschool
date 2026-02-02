@@ -21,7 +21,6 @@ interface StudentSubmission {
   score: number | null;
   student?: {
     full_name: string;
-    email: string;
   };
 }
 
@@ -159,7 +158,7 @@ Note: This is placeholder feedback. Connect to an AI service for real analysis.`
               {submission.student?.full_name || "Unknown Student"}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {submission.student?.email}
+              {submission.status === "reviewed" ? "Reviewed" : "Pending Review"}
             </p>
           </div>
         </div>
