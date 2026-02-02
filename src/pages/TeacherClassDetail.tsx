@@ -19,7 +19,8 @@ import SkillsManager from "@/components/teacher/SkillsManager";
 
 interface Student {
   id: string;
-  email: string;
+  class_id: string;
+  user_id: string | null;
   full_name: string;
   status: string;
   enrolled_at: string;
@@ -126,10 +127,10 @@ const TeacherClassDetail = () => {
 
     setClassInfo(classData);
 
-    // Fetch students
+    // Fetch students - only select fields needed for display (excludes email for privacy)
     const { data: studentsData } = await supabase
       .from("students")
-      .select("*")
+      .select("id, class_id, user_id, full_name, status, enrolled_at")
       .eq("class_id", classId)
       .order("full_name");
 
