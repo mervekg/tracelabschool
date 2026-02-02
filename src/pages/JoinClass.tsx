@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import SolviaLogo from "@/components/SolviaLogo";
+import TraceLabLogo from "@/components/TraceLabLogo";
 import { Users, ArrowRight, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 
 const JoinClass = () => {
@@ -83,7 +83,7 @@ const JoinClass = () => {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <SolviaLogo size="lg" />
+            <TraceLabLogo size="lg" />
           </div>
           <p className="text-muted-foreground">Join a class using an invite code or link</p>
         </div>

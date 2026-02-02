@@ -405,7 +405,7 @@ const RubricBuilder = () => {
             AI Alignment Settings
           </h2>
           <p className="text-sm text-muted-foreground mb-4">
-            Solvia AI will automatically analyze student work based on your rubric categories and provide 
+            TraceLab AI will automatically analyze student work based on your rubric categories and provide 
             initial scoring suggestions. You can always override these suggestions.
           </p>
           <div className="flex gap-4">

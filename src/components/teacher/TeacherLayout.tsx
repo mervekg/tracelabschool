@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Search, Shield, Mail, LogOut, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import SolviaLogo from "@/components/SolviaLogo";
+import TraceLabLogo from "@/components/TraceLabLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import LanguageSelector from "@/components/LanguageSelector";
@@ -97,7 +97,7 @@ const TeacherLayout = ({
       <header className="bg-background border-b border-border px-4 md:px-6 py-3 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4 md:gap-6">
-            <SolviaLogo size="md" showText={true} />
+            <TraceLabLogo size="md" showText={true} />
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1">

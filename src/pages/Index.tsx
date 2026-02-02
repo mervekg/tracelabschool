@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import SolviaLogo from "@/components/SolviaLogo";
+import TraceLabLogo from "@/components/TraceLabLogo";
 import AddParentsDialog from "@/components/AddParentsDialog";
 import LanguageSelector from "@/components/LanguageSelector";
 import { toast } from "sonner";
@@ -107,7 +107,7 @@ const Index = () => {
         <div className="w-full max-w-3xl space-y-10">
           {/* Logo */}
           <div className="flex justify-center">
-            <SolviaLogo size="xl" />
+            <TraceLabLogo size="xl" />
           </div>
 
           {/* Welcome Text */}
@@ -118,7 +118,7 @@ const Index = () => {
               </p>
             )}
             <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
-              I will be using Solvia as:
+              I will be using TraceLab as:
             </h1>
           </div>
 
