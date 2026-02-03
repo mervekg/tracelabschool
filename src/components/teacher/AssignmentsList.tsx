@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import RubricEditor, { Rubric } from "./RubricEditor";
+import AssignmentChecklist from "./AssignmentChecklist";
 
 interface Assignment {
   id: string;
@@ -390,6 +391,18 @@ const AssignmentsList = ({ classId, assignments, gradeLevel, subject, onRefresh,
                     </div>
                   )}
                 </div>
+
+                {/* Pre-Publish Checklist */}
+                <AssignmentChecklist
+                  title={title}
+                  description={description}
+                  dueDate={dueDate}
+                  assignmentType={assignmentType}
+                  externalLink={externalLink}
+                  pdfFile={pdfFile}
+                  includeRubric={includeRubric}
+                  rubricCreated={rubric !== null}
+                />
               </div>
             </Tabs>
 
