@@ -1,4 +1,4 @@
-import { ArrowLeft, ThumbsUp, MessageSquare, Save, Send, Download, Sparkles, PenTool, ZoomIn, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ThumbsUp, MessageSquare, Save, Send, Download, Sparkles, PenTool, ZoomIn, CheckCircle2, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,10 +8,83 @@ import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { TeacherRubricView, type Rubric, type AIGradingResult, type CriterionScore } from "@/components/rubric";
+
+// Mock rubric for demo - in production this would come from the assignment
+const mockRubric: Rubric = {
+  id: "demo-rubric",
+  name: "Paragraph Writing Rubric",
+  totalPoints: 100,
+  criteria: [
+    {
+      id: "content",
+      name: "Content & Ideas",
+      description: "Clear main idea with supporting details",
+      weight: 1.0,
+      maxScore: 25,
+      levels: [
+        { level: 4, label: "Excellent", teacherDescription: "Clear, focused main idea with rich, relevant supporting details that enhance the reader's understanding.", studentDescription: "You have a clear main idea with great details!" },
+        { level: 3, label: "Good", teacherDescription: "Main idea is present with adequate supporting details, though some may be general.", studentDescription: "Good main idea with some nice details." },
+        { level: 2, label: "Developing", teacherDescription: "Main idea is unclear or supporting details are limited or tangential.", studentDescription: "Try to add more details to your main idea." },
+        { level: 1, label: "Needs Improvement", teacherDescription: "Main idea is missing or supporting details are absent.", studentDescription: "Remember to include a main idea and details." },
+      ],
+    },
+    {
+      id: "organization",
+      name: "Organization",
+      description: "Logical flow and paragraph structure",
+      weight: 1.0,
+      maxScore: 25,
+      levels: [
+        { level: 4, label: "Excellent", teacherDescription: "Strong topic sentence, logical sequence, and effective transitions throughout.", studentDescription: "Your paragraph flows really well from start to finish!" },
+        { level: 3, label: "Good", teacherDescription: "Has topic sentence and generally follows logical order with some transitions.", studentDescription: "Good structure with a clear topic sentence." },
+        { level: 2, label: "Developing", teacherDescription: "Topic sentence is weak or order is sometimes confusing.", studentDescription: "Work on making your topic sentence stronger." },
+        { level: 1, label: "Needs Improvement", teacherDescription: "No clear topic sentence and disorganized ideas.", studentDescription: "Start with a clear topic sentence." },
+      ],
+    },
+    {
+      id: "mechanics",
+      name: "Mechanics",
+      description: "Grammar, punctuation, capitalization",
+      weight: 1.0,
+      maxScore: 25,
+      levels: [
+        { level: 4, label: "Excellent", teacherDescription: "Virtually no errors in grammar, punctuation, or capitalization.", studentDescription: "Excellent punctuation and grammar!" },
+        { level: 3, label: "Good", teacherDescription: "Few minor errors that don't interfere with meaning.", studentDescription: "Good job with your writing mechanics." },
+        { level: 2, label: "Developing", teacherDescription: "Several errors that occasionally interfere with meaning.", studentDescription: "Check your punctuation and capitalization." },
+        { level: 1, label: "Needs Improvement", teacherDescription: "Numerous errors that significantly interfere with meaning.", studentDescription: "Practice your punctuation and capital letters." },
+      ],
+    },
+    {
+      id: "wordChoice",
+      name: "Word Choice",
+      description: "Descriptive and appropriate vocabulary",
+      weight: 1.0,
+      maxScore: 25,
+      levels: [
+        { level: 4, label: "Excellent", teacherDescription: "Precise, vivid, and engaging word choices that paint a clear picture.", studentDescription: "You used amazing descriptive words!" },
+        { level: 3, label: "Good", teacherDescription: "Generally effective word choices with some attempts at descriptive language.", studentDescription: "Nice word choices throughout." },
+        { level: 2, label: "Developing", teacherDescription: "Basic vocabulary with few attempts at descriptive language.", studentDescription: "Try using more interesting words." },
+        { level: 1, label: "Needs Improvement", teacherDescription: "Limited vocabulary with incorrect word usage.", studentDescription: "Practice using new vocabulary words." },
+      ],
+    },
+  ],
+};
+
+// Mock student content
+const mockStudentContent = `Once upon a time, there was a curious student named Emma who loved to explore. 
+This weekend was extra special because I went to the science museum with my family. 
+I saw enormous dinosaur skeletons and sparkling gemstones. My favorite part was the 
+planetarium show about outer space. We also had lunch at a delicious Italian restaurant. 
+After that, I spent Sunday afternoon reading my new book in the park. It was a wonderful 
+weekend full of learning and fun!`;
 
 const TeacherReview = () => {
   const navigate = useNavigate();
   const [acceptAIScoring, setAcceptAIScoring] = useState(true);
+  const [isGrading, setIsGrading] = useState(false);
+  const [aiGradingResult, setAiGradingResult] = useState<AIGradingResult | null>(null);
   const [scores, setScores] = useState({
     content: 25,
     organization: 18,
@@ -19,9 +92,48 @@ const TeacherReview = () => {
     wordChoice: 22,
   });
 
+  const handleRunAIGrading = async () => {
+    setIsGrading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("grade-submission", {
+        body: {
+          studentContent: mockStudentContent,
+          rubric: mockRubric,
+          gradeLevel: "5th Grade",
+          subject: "English Language Arts",
+        },
+      });
+
+      if (error) throw error;
+
+      setAiGradingResult(data);
+      
+      // Update scores from AI results
+      const newScores = { ...scores };
+      data.scores.forEach((score: CriterionScore) => {
+        if (score.criterionId === "content") newScores.content = Math.round(score.score);
+        if (score.criterionId === "organization") newScores.organization = Math.round(score.score);
+        if (score.criterionId === "mechanics") newScores.mechanics = Math.round(score.score);
+        if (score.criterionId === "wordChoice") newScores.wordChoice = Math.round(score.score);
+      });
+      setScores(newScores);
+      
+      toast.success("AI grading complete!");
+    } catch (error: any) {
+      console.error("Grading error:", error);
+      toast.error(error.message || "Failed to run AI grading");
+    } finally {
+      setIsGrading(false);
+    }
+  };
+
   const handleApprove = () => {
     toast.success("Feedback sent to Emma!");
     setTimeout(() => navigate('/teacher'), 1000);
+  };
+
+  const getAIJustification = (criterionId: string): string | null => {
+    return aiGradingResult?.scores.find(s => s.criterionId === criterionId)?.aiJustification || null;
   };
 
   return (
@@ -66,14 +178,9 @@ const TeacherReview = () => {
             </div>
 
             {/* Main Handwritten Work Display */}
-            <div className="lined-paper bg-white p-8 rounded-xl border border-border min-h-[600px] relative">
+            <div className="lined-paper bg-white p-8 rounded-xl border border-border min-h-[400px] relative">
               <p className="font-handwriting text-lg leading-10 text-foreground/90">
-                Once upon a time, there was a curious student named Emma who loved to explore. 
-                This weekend was extra special because I went to the science museum with my family. 
-                I saw enormous dinosaur skeletons and sparkling gemstones. My favorite part was the 
-                planetarium show about outer space. We also had lunch at a delicious Italian restaurant. 
-                After that, I spent Sunday afternoon reading my new book in the park. It was a wonderful 
-                weekend full of learning and fun!
+                {mockStudentContent}
               </p>
               
               {/* Teacher Annotation Demo */}
@@ -93,6 +200,9 @@ const TeacherReview = () => {
               </div>
             </div>
 
+            {/* Rubric View (Teacher) */}
+            <TeacherRubricView rubric={mockRubric} compact />
+
             {/* Student Growth Comparison */}
             <Card className="p-4 bg-secondary/30 border-secondary">
               <h3 className="font-semibold mb-2 flex items-center gap-2">
@@ -108,6 +218,25 @@ const TeacherReview = () => {
 
           {/* RIGHT: Feedback Panel (1/3 width) */}
           <div className="space-y-4">
+            {/* AI Grading Button */}
+            <Button 
+              onClick={handleRunAIGrading} 
+              disabled={isGrading}
+              className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+            >
+              {isGrading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Grading with AI...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Run AI Grading
+                </>
+              )}
+            </Button>
+
             {/* AI Pre-Analysis Summary */}
             <Card className="p-6 shadow-card bg-gradient-to-br from-accent/10 to-accent/5 border-accent/30">
               <div className="flex items-center gap-2 mb-3">
@@ -115,35 +244,48 @@ const TeacherReview = () => {
                 <h2 className="text-lg font-semibold">TraceLab Pre-Analysis</h2>
               </div>
               <div className="space-y-3 text-sm">
-                <div className="p-3 rounded-lg bg-card border border-border">
-                  <p className="font-medium mb-1 flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-success" />
-                    Content Accuracy
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">Clear main idea with details</p>
-                    <Badge className="bg-success text-success-foreground">4/4</Badge>
-                  </div>
-                </div>
-                <div className="p-3 rounded-lg bg-card border border-border">
-                  <p className="font-medium mb-1">Writing Mechanics</p>
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">Excellent punctuation</p>
-                    <Badge className="bg-success text-success-foreground">4/4</Badge>
-                  </div>
-                </div>
-                <div className="p-3 rounded-lg bg-card border border-border">
-                  <p className="font-medium mb-1">✨ Strengths</p>
-                  <p className="text-xs text-muted-foreground">
-                    Excellent descriptive vocabulary. Perfect punctuation throughout.
-                  </p>
-                </div>
-                <div className="p-3 rounded-lg bg-card border border-border">
-                  <p className="font-medium mb-1">💡 Suggestions</p>
-                  <p className="text-xs text-muted-foreground">
-                    Strengthen topic sentence. Vary sentence starters for better flow.
-                  </p>
-                </div>
+                {aiGradingResult ? (
+                  <>
+                    <div className="p-3 rounded-lg bg-card border border-border">
+                      <p className="font-medium mb-1">✨ Strengths</p>
+                      <p className="text-xs text-muted-foreground">
+                        {aiGradingResult.feedback.strengths}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-card border border-border">
+                      <p className="font-medium mb-1">💡 Improvements</p>
+                      <p className="text-xs text-muted-foreground">
+                        {aiGradingResult.feedback.improvements}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-card border border-border">
+                      <p className="font-medium mb-1">→ Next Step</p>
+                      <p className="text-xs text-muted-foreground">
+                        {aiGradingResult.feedback.nextStep}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="p-3 rounded-lg bg-card border border-border">
+                      <p className="font-medium mb-1 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-success" />
+                        Content Accuracy
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-muted-foreground">Clear main idea with details</p>
+                        <Badge className="bg-success text-success-foreground">4/4</Badge>
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-card border border-border">
+                      <p className="font-medium mb-1">Writing Mechanics</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-muted-foreground">Excellent punctuation</p>
+                        <Badge className="bg-success text-success-foreground">4/4</Badge>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </Card>
 
@@ -156,65 +298,32 @@ const TeacherReview = () => {
                     checked={acceptAIScoring}
                     onCheckedChange={setAcceptAIScoring}
                   />
-                  <span className="text-xs text-muted-foreground">Accept TraceLab</span>
+                  <span className="text-xs text-muted-foreground">Accept AI</span>
                 </div>
               </div>
               <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium">Content & Ideas</p>
-                    <p className="text-sm font-bold">{scores.content}/25</p>
-                  </div>
-                  <Slider 
-                    value={[scores.content]} 
-                    max={25} 
-                    className="mb-1"
-                    onValueChange={(val) => setScores({...scores, content: val[0]})}
-                  />
-                  <p className="text-xs text-muted-foreground">Clear main idea with details</p>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium">Organization</p>
-                    <p className="text-sm font-bold">{scores.organization}/25</p>
-                  </div>
-                  <Slider 
-                    value={[scores.organization]} 
-                    max={25} 
-                    className="mb-1"
-                    onValueChange={(val) => setScores({...scores, organization: val[0]})}
-                  />
-                  <p className="text-xs text-muted-foreground">Topic sentence needs work</p>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium">Mechanics</p>
-                    <p className="text-sm font-bold">{scores.mechanics}/25</p>
-                  </div>
-                  <Slider 
-                    value={[scores.mechanics]} 
-                    max={25} 
-                    className="mb-1"
-                    onValueChange={(val) => setScores({...scores, mechanics: val[0]})}
-                  />
-                  <p className="text-xs text-muted-foreground">Excellent punctuation</p>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium">Word Choice</p>
-                    <p className="text-sm font-bold">{scores.wordChoice}/25</p>
-                  </div>
-                  <Slider 
-                    value={[scores.wordChoice]} 
-                    max={25} 
-                    className="mb-1"
-                    onValueChange={(val) => setScores({...scores, wordChoice: val[0]})}
-                  />
-                  <p className="text-xs text-muted-foreground">Great descriptive words!</p>
-                </div>
+                {mockRubric.criteria.map((criterion) => {
+                  const scoreKey = criterion.id as keyof typeof scores;
+                  const justification = getAIJustification(criterion.id);
+                  
+                  return (
+                    <div key={criterion.id}>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm font-medium">{criterion.name}</p>
+                        <p className="text-sm font-bold">{scores[scoreKey]}/{criterion.maxScore}</p>
+                      </div>
+                      <Slider 
+                        value={[scores[scoreKey]]} 
+                        max={criterion.maxScore} 
+                        className="mb-1"
+                        onValueChange={(val) => setScores({...scores, [scoreKey]: val[0]})}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {justification || criterion.description}
+                      </p>
+                    </div>
+                  );
+                })}
 
                 <div className="pt-4 border-t border-border">
                   <div className="flex items-center justify-between">
