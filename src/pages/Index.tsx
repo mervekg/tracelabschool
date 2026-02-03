@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import TraceLabLogo from "@/components/TraceLabLogo";
 import ParentJoinDialog from "@/components/ParentJoinDialog";
+import LanguageSelector from "@/components/LanguageSelector";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -81,27 +82,30 @@ const Index = () => {
       {/* Sticky App Bar */}
       <header className="sticky top-0 z-50 w-full px-6 py-4 flex justify-between items-center border-b border-border/50 bg-background/95 backdrop-blur-sm">
         <TraceLabLogo size="lg" linkTo="/" />
-        {user ? (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleSignOut} 
-            className="gap-2"
-          >
-            <LogOut className="w-4 h-4" />
-            Sign Out
-          </Button>
-        ) : (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => navigate("/auth")} 
-            className="gap-2"
-          >
-            <LogIn className="w-4 h-4" />
-            Sign In
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <LanguageSelector variant="icon" />
+          {user ? (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleSignOut} 
+              className="gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </Button>
+          ) : (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate("/auth")} 
+              className="gap-2"
+            >
+              <LogIn className="w-4 h-4" />
+              Sign In
+            </Button>
+          )}
+        </div>
       </header>
 
       {/* Main Content - positioned in upper third */}
