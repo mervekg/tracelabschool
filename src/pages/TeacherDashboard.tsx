@@ -236,7 +236,10 @@ const TeacherDashboard = () => {
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Quick Stats Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-4 bg-gradient-to-br from-warning/10 to-warning/5 border-warning/20">
+          <Card 
+            className="p-4 bg-gradient-to-br from-warning/10 to-warning/5 border-warning/20 cursor-pointer hover:shadow-md transition-all"
+            onClick={() => navigate('/teacher/review')}
+          >
             <p className="text-sm text-muted-foreground mb-1">Pending Reviews</p>
             <div className="flex items-center justify-between">
               <p className="text-2xl font-bold text-foreground">{classStats.pendingReviews}</p>
@@ -244,7 +247,10 @@ const TeacherDashboard = () => {
             </div>
           </Card>
 
-          <Card className="p-4 bg-gradient-to-br from-muted/50 to-muted/30 border-border">
+          <Card 
+            className="p-4 bg-gradient-to-br from-muted/50 to-muted/30 border-border cursor-pointer hover:shadow-md transition-all"
+            onClick={() => courses.length > 0 ? navigate(`/teacher/class/${courses[0].id}`) : null}
+          >
             <p className="text-sm text-muted-foreground mb-1">Total Students</p>
             <div className="flex items-center justify-between">
               <p className="text-2xl font-bold text-foreground">{classStats.totalStudents}</p>
@@ -252,7 +258,10 @@ const TeacherDashboard = () => {
             </div>
           </Card>
 
-          <Card className="p-4 bg-gradient-to-br from-success/10 to-success/5 border-success/20">
+          <Card 
+            className="p-4 bg-gradient-to-br from-success/10 to-success/5 border-success/20 cursor-pointer hover:shadow-md transition-all"
+            onClick={() => navigate('/teacher/review')}
+          >
             <p className="text-sm text-muted-foreground mb-1">Avg Score</p>
             <div className="flex items-center justify-between">
               <p className="text-2xl font-bold text-success">{classStats.avgScore || "—"}%</p>
