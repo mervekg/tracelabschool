@@ -18,6 +18,7 @@ import SubmissionReview from "@/components/teacher/SubmissionReview";
 import SkillsManager from "@/components/teacher/SkillsManager";
 import StudentInviteDialog from "@/components/StudentInviteDialog";
 import CreateTestStudentDialog from "@/components/teacher/CreateTestStudentDialog";
+import CourseKPICards from "@/components/teacher/CourseKPICards";
 
 interface Student {
   id: string;
@@ -84,6 +85,13 @@ const TeacherClassDetail = () => {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  
+  // KPI stats for this class
+  const [classKPIs, setClassKPIs] = useState({
+    pendingReviews: 0,
+    avgScore: 0,
+    violationCount: 0,
+  });
   
   // Assignment drill-down state
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
@@ -158,8 +166,37 @@ const TeacherClassDetail = () => {
       .eq("class_id", classId)
       .order("created_at", { ascending: false });
 
-    // Get submission counts for each assignment
+    // Get submission counts and stats for each assignment
     if (assignmentsData) {
+      const assignmentIds = assignmentsData.map(a => a.id);
+      
+      // Fetch all submissions for this class's assignments
+      const { data: allSubmissions } = await supabase
+        .from("student_submissions")
+        .select("assignment_id, status, score")
+        .in("assignment_id", assignmentIds);
+      
+      // Calculate KPIs
+      let pendingCount = 0;
+      let totalScore = 0;
+      let gradedCount = 0;
+      
+      allSubmissions?.forEach(sub => {
+        if (sub.status === "pending" || sub.status === "submitted") {
+          pendingCount++;
+        }
+        if (sub.status === "graded" && sub.score !== null) {
+          totalScore += Number(sub.score);
+          gradedCount++;
+        }
+      });
+      
+      setClassKPIs({
+        pendingReviews: pendingCount,
+        avgScore: gradedCount > 0 ? Math.round(totalScore / gradedCount) : 0,
+        violationCount: 0, // Will be added when violations table exists
+      });
+
       const assignmentsWithCounts = await Promise.all(
         assignmentsData.map(async (assignment) => {
           const { count } = await supabase
@@ -428,6 +465,15 @@ const TeacherClassDetail = () => {
             </p>
           </div>
         </div>
+
+        {/* KPI Cards for this course */}
+        <CourseKPICards
+          classId={classId || ""}
+          pendingReviews={classKPIs.pendingReviews}
+          studentCount={students.length}
+          avgScore={classKPIs.avgScore}
+          violationCount={classKPIs.violationCount}
+        />
 
         {/* Join Code & Link Card */}
         <Card>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, FileCheck, AlertCircle, TrendingUp, BookOpen, Calendar, Shield } from "lucide-react";
+import { BookOpen, Calendar, FileCheck, AlertCircle, Layers } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -234,49 +234,40 @@ const TeacherDashboard = () => {
       showSearch={true}
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
-        {/* Quick Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card 
-            className="p-4 bg-gradient-to-br from-warning/10 to-warning/5 border-warning/20 cursor-pointer hover:shadow-md transition-all"
-            onClick={() => navigate('/teacher/review')}
-          >
-            <p className="text-sm text-muted-foreground mb-1">Pending Reviews</p>
-            <div className="flex items-center justify-between">
-              <p className="text-2xl font-bold text-foreground">{classStats.pendingReviews}</p>
-              <FileCheck className="w-6 h-6 text-muted-foreground/30" />
+        {/* Simple Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Total Courses */}
+          <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-full bg-primary/20">
+                <Layers className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Courses</p>
+                <p className="text-3xl font-bold text-foreground">{courses.length}</p>
+              </div>
             </div>
           </Card>
 
-          <Card 
-            className="p-4 bg-gradient-to-br from-muted/50 to-muted/30 border-border cursor-pointer hover:shadow-md transition-all"
-            onClick={() => courses.length > 0 ? navigate(`/teacher/class/${courses[0].id}`) : null}
-          >
-            <p className="text-sm text-muted-foreground mb-1">Total Students</p>
-            <div className="flex items-center justify-between">
-              <p className="text-2xl font-bold text-foreground">{classStats.totalStudents}</p>
-              <Users className="w-6 h-6 text-muted-foreground/30" />
-            </div>
-          </Card>
-
-          <Card 
-            className="p-4 bg-gradient-to-br from-success/10 to-success/5 border-success/20 cursor-pointer hover:shadow-md transition-all"
-            onClick={() => navigate('/teacher/review')}
-          >
-            <p className="text-sm text-muted-foreground mb-1">Avg Score</p>
-            <div className="flex items-center justify-between">
-              <p className="text-2xl font-bold text-success">{classStats.avgScore || "—"}%</p>
-              <TrendingUp className="w-6 h-6 text-muted-foreground/30" />
-            </div>
-          </Card>
-
-          <Card 
-            className="p-4 bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 cursor-pointer hover:shadow-md transition-all"
-            onClick={() => navigate('/teacher/violation-reports')}
-          >
-            <p className="text-sm text-muted-foreground mb-1">Violations</p>
-            <div className="flex items-center justify-between">
-              <p className="text-2xl font-bold text-foreground">{classStats.violationCount}</p>
-              <Shield className="w-6 h-6 text-muted-foreground/30" />
+          {/* Today's Overview */}
+          <Card className="p-6 bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-full bg-accent/20">
+                <Calendar className="w-6 h-6 text-accent-foreground" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground">Today's Overview</p>
+                <div className="flex items-center gap-4 mt-1">
+                  <span className="text-sm">
+                    <span className="font-bold text-foreground">{classStats.totalStudents}</span>
+                    <span className="text-muted-foreground"> students</span>
+                  </span>
+                  <span className="text-sm">
+                    <span className="font-bold text-warning">{classStats.pendingReviews}</span>
+                    <span className="text-muted-foreground"> pending reviews</span>
+                  </span>
+                </div>
+              </div>
             </div>
           </Card>
         </div>
