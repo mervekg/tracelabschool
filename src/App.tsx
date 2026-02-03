@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import StudentDashboard from "./pages/StudentDashboard";
 import StudentWorkspace from "./pages/StudentWorkspace";
+import StudentProblemWorkspace from "./pages/StudentProblemWorkspace";
 import StudentAnalysis from "./pages/StudentAnalysis";
 import StudentFeedback from "./pages/StudentFeedback";
 import TeacherDashboard from "./pages/TeacherDashboard";
@@ -51,6 +52,11 @@ const App = () => (
           <Route path="/student/workspace" element={
             <ProtectedRoute requiredRole="student">
               <StudentWorkspace />
+            </ProtectedRoute>
+          } />
+          <Route path="/student/problem" element={
+            <ProtectedRoute requiredRole="student">
+              <StudentProblemWorkspace />
             </ProtectedRoute>
           } />
           <Route path="/student/analysis" element={
