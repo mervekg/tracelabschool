@@ -13,6 +13,7 @@ import TraceLabLogo from "@/components/TraceLabLogo";
 import RoleSelector, { type SignupRole } from "@/components/auth/RoleSelector";
 import TeacherSignupFields from "@/components/auth/TeacherSignupFields";
 import PasswordRequirements, { validatePassword } from "@/components/auth/PasswordRequirements";
+import LanguageSelector from "@/components/LanguageSelector";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -265,14 +266,20 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen paper-texture flex items-center justify-center p-6">
-      <Card className="w-full max-w-md p-8 shadow-card">
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-2">
-            <TraceLabLogo size="lg" />
+    <div className="min-h-screen paper-texture flex flex-col">
+      {/* Language selector header */}
+      <header className="sticky top-0 z-50 w-full px-6 py-3 flex justify-end border-b border-border/50 bg-background/95 backdrop-blur-sm">
+        <LanguageSelector variant="icon" />
+      </header>
+      
+      <div className="flex-1 flex items-center justify-center p-6">
+        <Card className="w-full max-w-md p-8 shadow-card">
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-2">
+              <TraceLabLogo size="lg" />
+            </div>
+            <p className="text-muted-foreground">Welcome back</p>
           </div>
-          <p className="text-muted-foreground">Welcome back</p>
-        </div>
 
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
@@ -510,6 +517,7 @@ const Auth = () => {
           </Button>
         </div>
       </Card>
+      </div>
     </div>
   );
 };
