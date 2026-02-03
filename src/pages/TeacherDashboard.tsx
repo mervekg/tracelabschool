@@ -7,6 +7,7 @@ import CourseCard from "@/components/CourseCard";
 import CreateClassDialog from "@/components/CreateClassDialog";
 import { supabase } from "@/integrations/supabase/client";
 import TeacherLayout from "@/components/teacher/TeacherLayout";
+
 interface Course {
   id: string;
   title: string;
@@ -16,6 +17,16 @@ interface Course {
   thumbnailUrl?: string;
   isFavorite: boolean;
   color: string;
+  studentCount: number;
+  pendingReviewCount: number;
+  violationCount: number;
+}
+
+interface ClassStats {
+  totalStudents: number;
+  avgScore: number;
+  pendingReviews: number;
+  violationCount: number;
 }
 
 const TeacherDashboard = () => {
@@ -24,6 +35,12 @@ const TeacherDashboard = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [teacherLastName, setTeacherLastName] = useState("Teacher");
   const [loading, setLoading] = useState(true);
+  const [classStats, setClassStats] = useState<ClassStats>({
+    totalStudents: 0,
+    avgScore: 0,
+    pendingReviews: 0,
+    violationCount: 0,
+  });
 
   const fetchClasses = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -40,7 +57,6 @@ const TeacherDashboard = () => {
       const nameParts = profile.full_name.split(" ");
       setTeacherLastName(nameParts[nameParts.length - 1] || "Teacher");
     } else {
-      // Try to get from email
       const emailName = user.email?.split("@")[0] || "Teacher";
       setTeacherLastName(emailName.charAt(0).toUpperCase() + emailName.slice(1));
     }
@@ -54,18 +70,86 @@ const TeacherDashboard = () => {
 
     if (error) {
       console.error("Error fetching classes:", error);
-    } else if (classes) {
-      setCourses(classes.map(c => ({
-        id: c.id,
-        title: c.subject,
-        code: c.name,
-        section: c.section,
-        gradeLevel: c.grade_level,
-        thumbnailUrl: c.thumbnail_url || "",
-        isFavorite: c.is_favorite || false,
-        color: c.color || "#6366f1",
-      })));
+      setLoading(false);
+      return;
     }
+
+    if (!classes || classes.length === 0) {
+      setCourses([]);
+      setLoading(false);
+      return;
+    }
+
+    const classIds = classes.map(c => c.id);
+
+    // Fetch student counts per class
+    const { data: studentCounts } = await supabase
+      .from("students")
+      .select("class_id")
+      .in("class_id", classIds);
+
+    const studentCountMap: Record<string, number> = {};
+    studentCounts?.forEach(s => {
+      studentCountMap[s.class_id] = (studentCountMap[s.class_id] || 0) + 1;
+    });
+
+    // Fetch assignments for these classes to get pending submissions
+    const { data: assignments } = await supabase
+      .from("assignments")
+      .select("id, class_id")
+      .in("class_id", classIds);
+
+    const assignmentIds = assignments?.map(a => a.id) || [];
+    const assignmentClassMap: Record<string, string> = {};
+    assignments?.forEach(a => {
+      assignmentClassMap[a.id] = a.class_id;
+    });
+
+    // Fetch pending submissions
+    let pendingCountMap: Record<string, number> = {};
+    if (assignmentIds.length > 0) {
+      const { data: pendingSubmissions } = await supabase
+        .from("student_submissions")
+        .select("assignment_id")
+        .in("assignment_id", assignmentIds)
+        .in("status", ["pending", "submitted"]);
+
+      pendingSubmissions?.forEach(s => {
+        const classId = assignmentClassMap[s.assignment_id];
+        if (classId) {
+          pendingCountMap[classId] = (pendingCountMap[classId] || 0) + 1;
+        }
+      });
+    }
+
+    // Build courses with real counts
+    const coursesWithStats = classes.map(c => ({
+      id: c.id,
+      title: c.subject,
+      code: c.name,
+      section: c.section,
+      gradeLevel: c.grade_level,
+      thumbnailUrl: c.thumbnail_url || "",
+      isFavorite: c.is_favorite || false,
+      color: c.color || "#6366f1",
+      studentCount: studentCountMap[c.id] || 0,
+      pendingReviewCount: pendingCountMap[c.id] || 0,
+      violationCount: 0, // Will be added when violations table exists
+    }));
+
+    setCourses(coursesWithStats);
+
+    // Calculate aggregate stats
+    const totalStudents = Object.values(studentCountMap).reduce((a, b) => a + b, 0);
+    const totalPending = Object.values(pendingCountMap).reduce((a, b) => a + b, 0);
+
+    setClassStats({
+      totalStudents,
+      avgScore: 0, // Would need graded submissions to calculate
+      pendingReviews: totalPending,
+      violationCount: 0,
+    });
+
     setLoading(false);
   };
 
@@ -116,13 +200,6 @@ const TeacherDashboard = () => {
     course.section.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const classStats = {
-    totalStudents: 24,
-    avgScore: 87,
-    pendingReviews: 8,
-    completionRate: 92,
-  };
-
   return (
     <TeacherLayout 
       searchQuery={searchQuery} 
@@ -151,7 +228,7 @@ const TeacherDashboard = () => {
           <Card className="p-4 bg-gradient-to-br from-success/10 to-success/5 border-success/20">
             <p className="text-sm text-muted-foreground mb-1">Avg Score</p>
             <div className="flex items-center justify-between">
-              <p className="text-2xl font-bold text-success">{classStats.avgScore}%</p>
+              <p className="text-2xl font-bold text-success">{classStats.avgScore || "—"}%</p>
               <TrendingUp className="w-6 h-6 text-muted-foreground/30" />
             </div>
           </Card>
@@ -162,7 +239,7 @@ const TeacherDashboard = () => {
           >
             <p className="text-sm text-muted-foreground mb-1">Violations</p>
             <div className="flex items-center justify-between">
-              <p className="text-2xl font-bold text-foreground">7</p>
+              <p className="text-2xl font-bold text-foreground">{classStats.violationCount}</p>
               <Shield className="w-6 h-6 text-muted-foreground/30" />
             </div>
           </Card>
@@ -196,9 +273,9 @@ const TeacherDashboard = () => {
                   thumbnailUrl={course.thumbnailUrl}
                   isFavorite={course.isFavorite}
                   color={course.color}
-                  studentCount={Math.floor(Math.random() * 30) + 5}
-                  violationCount={Math.floor(Math.random() * 3)}
-                  pendingReviewCount={Math.floor(Math.random() * 10)}
+                  studentCount={course.studentCount}
+                  violationCount={course.violationCount}
+                  pendingReviewCount={course.pendingReviewCount}
                   onThumbnailChange={handleThumbnailChange}
                   onFavoriteToggle={handleFavoriteToggle}
                   onClick={() => navigate(`/teacher/class/${course.id}`)}
