@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Star, Edit2, Image as ImageIcon, X, Users, FileCheck, Upload, Link, Loader2 } from "lucide-react";
+import { Star, Edit2, Image as ImageIcon, X, Users, FileCheck, Upload, Link, Loader2, TrendingUp, Shield } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,7 @@ interface CourseCardProps {
   studentCount?: number;
   violationCount?: number;
   pendingReviewCount?: number;
+  avgScore?: number;
   onThumbnailChange?: (id: string, url: string) => void;
   onFavoriteToggle?: (id: string) => void;
   onClick?: () => void;
@@ -44,6 +45,7 @@ const CourseCard = ({
   studentCount,
   violationCount,
   pendingReviewCount,
+  avgScore,
   onThumbnailChange,
   onFavoriteToggle,
   onClick,
@@ -287,31 +289,38 @@ const CourseCard = ({
           {title}
         </h3>
         <p className="text-sm text-foreground font-medium">{code}</p>
-        <p className="text-xs text-muted-foreground">{schoolName}</p>
+        {schoolName && <p className="text-xs text-muted-foreground">{schoolName}</p>}
         
-        {/* Course Indicators */}
-        {(studentCount !== undefined || violationCount !== undefined || pendingReviewCount !== undefined) && (
-          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
-            {studentCount !== undefined && (
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <Users className="w-4 h-4" />
-                <span className="text-xs font-medium">{studentCount}</span>
-              </div>
-            )}
-            {violationCount !== undefined && violationCount > 0 && (
-              <div className="flex items-center gap-1 text-destructive">
-                <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-                <span className="text-xs font-medium">{violationCount}</span>
-              </div>
-            )}
-            {pendingReviewCount !== undefined && pendingReviewCount > 0 && (
-              <div className="flex items-center gap-1 text-primary">
-                <FileCheck className="w-4 h-4" />
-                <span className="text-xs font-medium">{pendingReviewCount}</span>
-              </div>
-            )}
+        {/* Course Stats Grid */}
+        <div className="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-border">
+          {/* Pending Reviews */}
+          <div className="flex flex-col items-center p-2 rounded-md bg-warning/10">
+            <FileCheck className="w-4 h-4 text-warning mb-1" />
+            <span className="text-sm font-bold text-foreground">{pendingReviewCount ?? 0}</span>
+            <span className="text-[10px] text-muted-foreground leading-tight text-center">Reviews</span>
           </div>
-        )}
+          
+          {/* Students */}
+          <div className="flex flex-col items-center p-2 rounded-md bg-muted/50">
+            <Users className="w-4 h-4 text-muted-foreground mb-1" />
+            <span className="text-sm font-bold text-foreground">{studentCount ?? 0}</span>
+            <span className="text-[10px] text-muted-foreground leading-tight text-center">Students</span>
+          </div>
+          
+          {/* Avg Score */}
+          <div className="flex flex-col items-center p-2 rounded-md bg-success/10">
+            <TrendingUp className="w-4 h-4 text-success mb-1" />
+            <span className="text-sm font-bold text-success">{avgScore !== undefined && avgScore > 0 ? `${avgScore}%` : "—"}</span>
+            <span className="text-[10px] text-muted-foreground leading-tight text-center">Avg</span>
+          </div>
+          
+          {/* Violations */}
+          <div className="flex flex-col items-center p-2 rounded-md bg-destructive/10">
+            <Shield className="w-4 h-4 text-destructive mb-1" />
+            <span className="text-sm font-bold text-foreground">{violationCount ?? 0}</span>
+            <span className="text-[10px] text-muted-foreground leading-tight text-center">Violations</span>
+          </div>
+        </div>
       </div>
     </Card>
   );

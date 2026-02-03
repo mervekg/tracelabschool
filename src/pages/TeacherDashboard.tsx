@@ -20,6 +20,7 @@ interface Course {
   studentCount: number;
   pendingReviewCount: number;
   violationCount: number;
+  avgScore: number;
 }
 
 interface ClassStats {
@@ -105,47 +106,73 @@ const TeacherDashboard = () => {
       assignmentClassMap[a.id] = a.class_id;
     });
 
-    // Fetch pending submissions
+    // Fetch pending submissions and graded submissions for avg score
     let pendingCountMap: Record<string, number> = {};
+    let scoresByClass: Record<string, { total: number; count: number }> = {};
+    
     if (assignmentIds.length > 0) {
-      const { data: pendingSubmissions } = await supabase
+      const { data: submissions } = await supabase
         .from("student_submissions")
-        .select("assignment_id")
-        .in("assignment_id", assignmentIds)
-        .in("status", ["pending", "submitted"]);
+        .select("assignment_id, status, score")
+        .in("assignment_id", assignmentIds);
 
-      pendingSubmissions?.forEach(s => {
+      submissions?.forEach(s => {
         const classId = assignmentClassMap[s.assignment_id];
         if (classId) {
-          pendingCountMap[classId] = (pendingCountMap[classId] || 0) + 1;
+          // Count pending reviews
+          if (s.status === "pending" || s.status === "submitted") {
+            pendingCountMap[classId] = (pendingCountMap[classId] || 0) + 1;
+          }
+          // Calculate avg score from graded submissions
+          if (s.status === "graded" && s.score !== null) {
+            if (!scoresByClass[classId]) {
+              scoresByClass[classId] = { total: 0, count: 0 };
+            }
+            scoresByClass[classId].total += Number(s.score);
+            scoresByClass[classId].count += 1;
+          }
         }
       });
     }
 
     // Build courses with real counts
-    const coursesWithStats = classes.map(c => ({
-      id: c.id,
-      title: c.subject,
-      code: c.name,
-      section: c.section,
-      gradeLevel: c.grade_level,
-      thumbnailUrl: c.thumbnail_url || "",
-      isFavorite: c.is_favorite || false,
-      color: c.color || "#6366f1",
-      studentCount: studentCountMap[c.id] || 0,
-      pendingReviewCount: pendingCountMap[c.id] || 0,
-      violationCount: 0, // Will be added when violations table exists
-    }));
+    const coursesWithStats = classes.map(c => {
+      const classScores = scoresByClass[c.id];
+      const avgScore = classScores && classScores.count > 0 
+        ? Math.round(classScores.total / classScores.count) 
+        : 0;
+      
+      return {
+        id: c.id,
+        title: c.subject,
+        code: c.name,
+        section: c.section,
+        gradeLevel: c.grade_level,
+        thumbnailUrl: c.thumbnail_url || "",
+        isFavorite: c.is_favorite || false,
+        color: c.color || "#6366f1",
+        studentCount: studentCountMap[c.id] || 0,
+        pendingReviewCount: pendingCountMap[c.id] || 0,
+        violationCount: 0, // Will be added when violations table exists
+        avgScore,
+      };
+    });
 
     setCourses(coursesWithStats);
 
     // Calculate aggregate stats
     const totalStudents = Object.values(studentCountMap).reduce((a, b) => a + b, 0);
     const totalPending = Object.values(pendingCountMap).reduce((a, b) => a + b, 0);
+    
+    // Calculate overall avg score
+    const allScores = Object.values(scoresByClass);
+    const totalScore = allScores.reduce((a, b) => a + b.total, 0);
+    const totalCount = allScores.reduce((a, b) => a + b.count, 0);
+    const overallAvg = totalCount > 0 ? Math.round(totalScore / totalCount) : 0;
 
     setClassStats({
       totalStudents,
-      avgScore: 0, // Would need graded submissions to calculate
+      avgScore: overallAvg,
       pendingReviews: totalPending,
       violationCount: 0,
     });
@@ -276,6 +303,7 @@ const TeacherDashboard = () => {
                   studentCount={course.studentCount}
                   violationCount={course.violationCount}
                   pendingReviewCount={course.pendingReviewCount}
+                  avgScore={course.avgScore}
                   onThumbnailChange={handleThumbnailChange}
                   onFavoriteToggle={handleFavoriteToggle}
                   onClick={() => navigate(`/teacher/class/${course.id}`)}
