@@ -117,7 +117,7 @@ const Index = () => {
               Welcome to TraceLab
             </h1>
             <p className="text-lg text-muted-foreground">
-              Choose how you'll use TraceLab today.
+              Choose how you'll use your TraceLab today.
             </p>
           </div>
 
