@@ -35,8 +35,8 @@ const Index = () => {
       subtitle: "Create classes and view learning traces.",
       icon: ClipboardList,
       path: "/teacher",
-      gradient: "bg-gradient-to-br from-primary/10 to-secondary/5",
-      iconBg: "bg-primary/10",
+      gradient: "bg-gradient-to-br from-primary/15 to-secondary/10",
+      iconBg: "bg-primary/20",
       iconColor: "text-primary",
     },
     {
@@ -44,17 +44,17 @@ const Index = () => {
       subtitle: "Practice and track your progress.",
       icon: PenLine,
       path: "/student",
-      gradient: "bg-gradient-to-br from-accent to-primary/5",
-      iconBg: "bg-accent",
-      iconColor: "text-accent-foreground",
+      gradient: "bg-gradient-to-br from-accent to-primary/10",
+      iconBg: "bg-primary/15",
+      iconColor: "text-primary",
     },
     {
       title: "Parent / Guardian",
       subtitle: "Use your child's QR code to join.",
       icon: Users,
       path: null, // Opens modal instead
-      gradient: "bg-gradient-to-br from-success/10 to-accent",
-      iconBg: "bg-success/10",
+      gradient: "bg-gradient-to-br from-success/15 to-accent",
+      iconBg: "bg-success/20",
       iconColor: "text-success",
     },
     {
@@ -62,8 +62,8 @@ const Index = () => {
       subtitle: "Manage schools and data access.",
       icon: Shield,
       path: "/admin",
-      gradient: "bg-gradient-to-br from-secondary/10 to-muted/30",
-      iconBg: "bg-secondary/10",
+      gradient: "bg-gradient-to-br from-secondary/15 to-muted/20",
+      iconBg: "bg-secondary/20",
       iconColor: "text-secondary",
     },
   ];
@@ -78,9 +78,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* App Bar */}
-      <header className="w-full px-6 py-4 flex justify-between items-center border-b border-border/50">
-        <TraceLabLogo size="md" linkTo="/" />
+      {/* Sticky App Bar */}
+      <header className="sticky top-0 z-50 w-full px-6 py-4 flex justify-between items-center border-b border-border/50 bg-background/95 backdrop-blur-sm">
+        <TraceLabLogo size="lg" linkTo="/" />
         {user ? (
           <Button 
             variant="outline" 
@@ -104,8 +104,8 @@ const Index = () => {
         )}
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+      {/* Main Content - positioned in upper third */}
+      <main className="flex-1 flex flex-col items-center px-6 py-8 pt-12">
         <div className="w-full max-w-2xl space-y-10">
           {/* Welcome Text */}
           <div className="text-center space-y-3">
@@ -122,13 +122,13 @@ const Index = () => {
             {roles.map((role) => (
               <Card
                 key={role.title}
-                className={`relative p-6 ${role.gradient} border border-border/60 hover:border-primary/40 hover:shadow-md transition-all duration-200 cursor-pointer group`}
+                className={`relative p-6 ${role.gradient} border border-border/60 hover:border-primary/50 hover:shadow-lg hover:bg-opacity-90 transition-all duration-200 cursor-pointer group`}
                 onClick={() => handleRoleClick(role)}
               >
                 <div className="flex flex-col items-center text-center space-y-4">
-                  {/* Icon Container */}
-                  <div className={`w-16 h-16 rounded-xl ${role.iconBg} flex items-center justify-center group-hover:scale-105 transition-transform duration-200`}>
-                    <role.icon className={`w-8 h-8 ${role.iconColor}`} strokeWidth={1.5} />
+                  {/* Icon Container - Larger */}
+                  <div className={`w-20 h-20 rounded-xl ${role.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-200 shadow-sm group-hover:shadow-md`}>
+                    <role.icon className={`w-10 h-10 ${role.iconColor}`} strokeWidth={1.5} />
                   </div>
                   
                   {/* Text */}
