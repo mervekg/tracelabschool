@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Users, FileText, UserCircle, ArrowLeft, Plus, Upload, Key, Copy, Check, Trash2, BookOpen, Link } from "lucide-react";
+import { Users, FileText, UserCircle, ArrowLeft, Plus, Upload, Key, Copy, Check, Trash2, BookOpen, Link, QrCode } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import AssignmentsList from "@/components/teacher/AssignmentsList";
 import StudentSubmissionsList from "@/components/teacher/StudentSubmissionsList";
 import SubmissionReview from "@/components/teacher/SubmissionReview";
 import SkillsManager from "@/components/teacher/SkillsManager";
+import StudentInviteDialog from "@/components/StudentInviteDialog";
 
 interface Student {
   id: string;
@@ -102,6 +103,10 @@ const TeacherClassDetail = () => {
   
   // CSV upload
   const [csvUploadOpen, setCsvUploadOpen] = useState(false);
+  
+  // Parent invite dialog
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [selectedStudentForInvite, setSelectedStudentForInvite] = useState<Student | null>(null);
 
   useEffect(() => {
     if (classId) {
@@ -544,13 +549,14 @@ const TeacherClassDetail = () => {
                     <TableHead>Student ID</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Enrolled</TableHead>
+                    <TableHead>Invite Parent</TableHead>
                     <TableHead className="w-16"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {students.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                         No students enrolled yet
                       </TableCell>
                     </TableRow>
@@ -565,6 +571,34 @@ const TeacherClassDetail = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>{new Date(student.enrolled_at).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedStudentForInvite(student);
+                                setInviteDialogOpen(true);
+                              }}
+                              className="gap-1"
+                            >
+                              <QrCode className="w-3 h-3" />
+                              Show QR
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const inviteLink = `${window.location.origin}/parent/join/P${student.id.slice(0, 6).toUpperCase()}`;
+                                navigator.clipboard.writeText(inviteLink);
+                              }}
+                              className="gap-1"
+                            >
+                              <Copy className="w-3 h-3" />
+                              Copy link
+                            </Button>
+                          </div>
+                        </TableCell>
                         <TableCell>
                           <Button
                             variant="ghost"
@@ -749,6 +783,19 @@ const TeacherClassDetail = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Student Invite Dialog */}
+        {selectedStudentForInvite && (
+          <StudentInviteDialog
+            open={inviteDialogOpen}
+            onOpenChange={(open) => {
+              setInviteDialogOpen(open);
+              if (!open) setSelectedStudentForInvite(null);
+            }}
+            studentName={selectedStudentForInvite.full_name}
+            studentId={selectedStudentForInvite.id}
+          />
+        )}
       </div>
     </TeacherLayout>
   );
