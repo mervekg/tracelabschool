@@ -1,5 +1,5 @@
 import { useState, useEffect, ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { LogOut, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TraceLabLogo from "@/components/TraceLabLogo";
@@ -13,17 +13,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-interface StudentLayoutProps {
+interface ParentLayoutProps {
   children: ReactNode;
 }
 
-const StudentLayout = ({ children }: StudentLayoutProps) => {
+const ParentLayout = ({ children }: ParentLayoutProps) => {
   const navigate = useNavigate();
-  const [studentName, setStudentName] = useState("");
+  const location = useLocation();
+  const [userName, setUserName] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const fetchStudentInfo = async () => {
+    const fetchUserInfo = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
@@ -34,13 +35,13 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
         .single();
 
       if (profile?.full_name) {
-        setStudentName(profile.full_name);
+        setUserName(profile.full_name);
       } else {
-        setStudentName(user.email?.split("@")[0] || "Student");
+        setUserName(user.email?.split("@")[0] || "Parent");
       }
     };
 
-    fetchStudentInfo();
+    fetchUserInfo();
   }, []);
 
   const handleLogout = async () => {
@@ -58,11 +59,16 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
   };
 
   const navItems = [
-    { label: "Dashboard", path: "/student" },
-    { label: "Workspace", path: "/student/workspace" },
-    { label: "Feedback", path: "/student/feedback" },
-    { label: "Progress", path: "/student/analysis" },
+    { label: "Dashboard", path: "/parent", exact: true },
+    { label: "Portfolio", path: "/parent/portfolio" },
   ];
+
+  const isActive = (path: string, exact?: boolean) => {
+    if (exact) {
+      return location.pathname === path;
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <div className="min-h-screen paper-texture">
@@ -70,14 +76,14 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
       <header className="bg-background border-b border-border px-4 md:px-6 py-3 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4 md:gap-6">
-            <TraceLabLogo size="md" linkTo="/student" />
+            <TraceLabLogo size="md" linkTo="/parent" />
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map((item) => (
                 <Button
                   key={item.path}
-                  variant="ghost"
+                  variant={isActive(item.path, item.exact) ? "secondary" : "ghost"}
                   className="font-medium"
                   onClick={() => navigate(item.path)}
                 >
@@ -97,14 +103,14 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
                 <Button variant="ghost" size="icon" className="rounded-full">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                      {getInitials(studentName)}
+                      {getInitials(userName)}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem className="font-medium">
-                  {studentName}
+                  {userName}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="w-4 h-4 mr-2" />
@@ -131,7 +137,7 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
             {navItems.map((item) => (
               <Button
                 key={item.path}
-                variant="ghost"
+                variant={isActive(item.path, item.exact) ? "secondary" : "ghost"}
                 className="w-full justify-start font-medium"
                 onClick={() => {
                   navigate(item.path);
@@ -155,4 +161,4 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
   );
 };
 
-export default StudentLayout;
+export default ParentLayout;
