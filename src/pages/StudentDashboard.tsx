@@ -1,16 +1,118 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BookOpen, FileText, MessageSquare, TrendingUp, Award, Clock, Mic, Zap, Languages } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import StudentLayout from "@/components/student/StudentLayout";
+import StudentCourseCard from "@/components/student/StudentCourseCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import TranslateButton from "@/components/TranslateButton";
+import { supabase } from "@/integrations/supabase/client";
+
+interface EnrolledCourse {
+  id: string;
+  title: string;
+  code: string;
+  section: string;
+  gradeLevel: string;
+  thumbnailUrl?: string;
+  isFavorite: boolean;
+  color: string;
+  teacherName: string;
+}
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [courses, setCourses] = useState<EnrolledCourse[]>([]);
+  const [studentName, setStudentName] = useState("Student");
+  const [loading, setLoading] = useState(true);
+
+  const fetchEnrolledCourses = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    // Fetch student's profile name
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.full_name) {
+      const firstName = profile.full_name.split(" ")[0];
+      setStudentName(firstName || "Student");
+    }
+
+    // Fetch enrolled classes via students table
+    const { data: enrollments, error } = await supabase
+      .from("students")
+      .select(`
+        class_id,
+        classes (
+          id,
+          name,
+          subject,
+          section,
+          grade_level,
+          thumbnail_url,
+          is_favorite,
+          color,
+          teacher_id
+        )
+      `)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Error fetching enrolled courses:", error);
+    } else if (enrollments) {
+      // Get teacher names for each class
+      const classesWithTeachers = await Promise.all(
+        enrollments
+          .filter(e => e.classes)
+          .map(async (enrollment) => {
+            const classData = enrollment.classes as any;
+            
+            // Fetch teacher profile
+            const { data: teacherProfile } = await supabase
+              .from("profiles")
+              .select("full_name")
+              .eq("id", classData.teacher_id)
+              .single();
+
+            return {
+              id: classData.id,
+              title: classData.subject,
+              code: classData.name,
+              section: classData.section,
+              gradeLevel: classData.grade_level,
+              thumbnailUrl: classData.thumbnail_url || "",
+              isFavorite: classData.is_favorite || false,
+              color: classData.color || "#6366f1",
+              teacherName: teacherProfile?.full_name || "Teacher",
+            };
+          })
+      );
+
+      setCourses(classesWithTeachers);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchEnrolledCourses();
+  }, []);
+
+  const filteredCourses = courses.filter(course =>
+    course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.section.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const [assignments, setAssignments] = useState([
     { id: 1, title: "Fraction Word Problems", subject: "Math", due: "Today", status: "pending", translatedTitle: "" },
@@ -38,11 +140,11 @@ const StudentDashboard = () => {
   return (
     <StudentLayout>
       <div className="p-6">
-        <div className="max-w-6xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* Welcome Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-primary mb-2">Welcome back, Emma!</h1>
+              <h1 className="text-4xl font-bold text-primary mb-2">Welcome back, {studentName}!</h1>
               <p className="text-muted-foreground">Let's continue your learning journey</p>
             </div>
             <div className="flex items-center gap-4">
@@ -56,6 +158,43 @@ const StudentDashboard = () => {
                 </div>
               </Card>
             </div>
+          </div>
+
+          {/* My Courses Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-foreground">My Courses</h2>
+            </div>
+
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : filteredCourses.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredCourses.map((course) => (
+                  <StudentCourseCard
+                    key={course.id}
+                    id={course.id}
+                    title={course.title}
+                    code={course.code}
+                    section={`${course.gradeLevel} - ${course.section}`}
+                    schoolName={course.teacherName}
+                    thumbnailUrl={course.thumbnailUrl}
+                    isFavorite={course.isFavorite}
+                    color={course.color}
+                    onClick={() => navigate(`/student/class/${course.id}`)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <Card className="p-8 text-center">
+                <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">
+                  You haven't joined any courses yet. Ask your teacher for a class code to get started!
+                </p>
+              </Card>
+            )}
           </div>
 
           {/* Feedback Notifications */}
