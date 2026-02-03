@@ -17,6 +17,7 @@ import StudentSubmissionsList from "@/components/teacher/StudentSubmissionsList"
 import SubmissionReview from "@/components/teacher/SubmissionReview";
 import SkillsManager from "@/components/teacher/SkillsManager";
 import StudentInviteDialog from "@/components/StudentInviteDialog";
+import CreateTestStudentDialog from "@/components/teacher/CreateTestStudentDialog";
 
 interface Student {
   id: string;
@@ -502,7 +503,12 @@ const TeacherClassDetail = () => {
 
           {/* Students Tab */}
           <TabsContent value="students" className="space-y-4">
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
+              <CreateTestStudentDialog 
+                classId={classId!} 
+                className={classInfo?.name || "this class"}
+                onCreated={fetchClassData}
+              />
               <Dialog open={addStudentOpen} onOpenChange={setAddStudentOpen}>
                 <DialogTrigger asChild>
                   <Button>
