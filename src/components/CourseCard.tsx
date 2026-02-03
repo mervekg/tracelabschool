@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Star, Edit2, Image as ImageIcon, X } from "lucide-react";
+import { Star, Edit2, Image as ImageIcon, X, Users, AlertCircle, FileCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +21,9 @@ interface CourseCardProps {
   thumbnailUrl?: string;
   isFavorite?: boolean;
   color?: string;
+  studentCount?: number;
+  violationCount?: number;
+  pendingReviewCount?: number;
   onThumbnailChange?: (id: string, url: string) => void;
   onFavoriteToggle?: (id: string) => void;
   onClick?: () => void;
@@ -35,6 +38,9 @@ const CourseCard = ({
   thumbnailUrl,
   isFavorite = false,
   color = "bg-primary/20",
+  studentCount,
+  violationCount,
+  pendingReviewCount,
   onThumbnailChange,
   onFavoriteToggle,
   onClick,
@@ -165,6 +171,30 @@ const CourseCard = ({
         </h3>
         <p className="text-sm text-foreground font-medium">{code}</p>
         <p className="text-xs text-muted-foreground">{schoolName}</p>
+        
+        {/* Course Indicators */}
+        {(studentCount !== undefined || violationCount !== undefined || pendingReviewCount !== undefined) && (
+          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
+            {studentCount !== undefined && (
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <Users className="w-4 h-4" />
+                <span className="text-xs font-medium">{studentCount}</span>
+              </div>
+            )}
+            {violationCount !== undefined && violationCount > 0 && (
+              <div className="flex items-center gap-1 text-destructive">
+                <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+                <span className="text-xs font-medium">{violationCount}</span>
+              </div>
+            )}
+            {pendingReviewCount !== undefined && pendingReviewCount > 0 && (
+              <div className="flex items-center gap-1 text-primary">
+                <FileCheck className="w-4 h-4" />
+                <span className="text-xs font-medium">{pendingReviewCount}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </Card>
   );

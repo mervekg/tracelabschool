@@ -131,47 +131,39 @@ const TeacherDashboard = () => {
     >
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Quick Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="p-4 bg-gradient-to-br from-warning/10 to-warning/5 border-warning/30">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="p-4 bg-gradient-to-br from-warning/10 to-warning/5 border-warning/20">
+            <p className="text-sm text-muted-foreground mb-1">Pending Reviews</p>
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Pending Reviews</p>
-                <p className="text-2xl font-bold text-warning-foreground">{classStats.pendingReviews}</p>
-              </div>
-              <FileCheck className="w-8 h-8 text-warning-foreground opacity-30" />
+              <p className="text-2xl font-bold text-foreground">{classStats.pendingReviews}</p>
+              <FileCheck className="w-6 h-6 text-muted-foreground/30" />
             </div>
           </Card>
 
-          <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30">
+          <Card className="p-4 bg-gradient-to-br from-muted/50 to-muted/30 border-border">
+            <p className="text-sm text-muted-foreground mb-1">Total Students</p>
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Total Students</p>
-                <p className="text-2xl font-bold text-primary">{classStats.totalStudents}</p>
-              </div>
-              <Users className="w-8 h-8 text-primary opacity-30" />
+              <p className="text-2xl font-bold text-foreground">{classStats.totalStudents}</p>
+              <Users className="w-6 h-6 text-muted-foreground/30" />
             </div>
           </Card>
 
-          <Card className="p-4 bg-gradient-to-br from-success/10 to-success/5 border-success/30">
+          <Card className="p-4 bg-gradient-to-br from-success/10 to-success/5 border-success/20">
+            <p className="text-sm text-muted-foreground mb-1">Avg Score</p>
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Avg Score</p>
-                <p className="text-2xl font-bold text-success">{classStats.avgScore}%</p>
-              </div>
-              <TrendingUp className="w-8 h-8 text-success opacity-30" />
+              <p className="text-2xl font-bold text-success">{classStats.avgScore}%</p>
+              <TrendingUp className="w-6 h-6 text-muted-foreground/30" />
             </div>
           </Card>
 
           <Card 
-            className="p-4 bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/30 cursor-pointer hover:shadow-md transition-all"
+            className="p-4 bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 cursor-pointer hover:shadow-md transition-all"
             onClick={() => navigate('/teacher/violation-reports')}
           >
+            <p className="text-sm text-muted-foreground mb-1">Violations</p>
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Violations</p>
-                <p className="text-2xl font-bold text-destructive">7</p>
-              </div>
-              <Shield className="w-8 h-8 text-destructive opacity-30" />
+              <p className="text-2xl font-bold text-foreground">7</p>
+              <Shield className="w-6 h-6 text-muted-foreground/30" />
             </div>
           </Card>
         </div>
@@ -204,6 +196,9 @@ const TeacherDashboard = () => {
                   thumbnailUrl={course.thumbnailUrl}
                   isFavorite={course.isFavorite}
                   color={course.color}
+                  studentCount={Math.floor(Math.random() * 30) + 5}
+                  violationCount={Math.floor(Math.random() * 3)}
+                  pendingReviewCount={Math.floor(Math.random() * 10)}
                   onThumbnailChange={handleThumbnailChange}
                   onFavoriteToggle={handleFavoriteToggle}
                   onClick={() => navigate(`/teacher/class/${course.id}`)}
