@@ -125,7 +125,10 @@ Create a detailed, age-appropriate rubric with:
 2. If Skills/Standards/TEKs were provided, align categories with those standards
 3. Clear, measurable criteria for each category
 4. Point values that total 100 points
-5. Grade-level appropriate language and expectations
+5. TWO versions of each criterion description:
+   - teacher_description: Detailed explanation for teachers and AI grading
+   - student_description: ONE short, clear sentence for students (no jargon, age-appropriate)
+6. Optional weight for grading (1.0 = normal, 1.5 = more important, 0.5 = less important)
 
 For ${gradeLevel}:
 - Use vocabulary and complexity suitable for the grade
@@ -139,12 +142,25 @@ Return a JSON object with this exact structure:
     {
       "name": "Category Name",
       "maxScore": 25,
+      "weight": 1.0,
       "description": "Brief description of what this category measures",
       "criteria": {
-        "excellent": "Description for full points",
-        "good": "Description for most points",
-        "developing": "Description for partial points",
-        "needs_improvement": "Description for minimal points"
+        "excellent": {
+          "teacher_description": "Detailed description for teachers/AI - what makes this excellent",
+          "student_description": "You did an amazing job with clear details!"
+        },
+        "good": {
+          "teacher_description": "Detailed description for teachers/AI - what makes this good",
+          "student_description": "You included good details in your work."
+        },
+        "developing": {
+          "teacher_description": "Detailed description for teachers/AI - what needs work",
+          "student_description": "You're learning! Add more details next time."
+        },
+        "needs_improvement": {
+          "teacher_description": "Detailed description for teachers/AI - significant gaps",
+          "student_description": "Keep practicing - you can do it!"
+        }
       }
     }
   ],

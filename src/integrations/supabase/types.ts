@@ -24,6 +24,7 @@ export type Database = {
           external_link: string | null
           id: string
           pdf_url: string | null
+          rubric_id: string | null
           title: string
           updated_at: string
         }
@@ -36,6 +37,7 @@ export type Database = {
           external_link?: string | null
           id?: string
           pdf_url?: string | null
+          rubric_id?: string | null
           title: string
           updated_at?: string
         }
@@ -48,6 +50,7 @@ export type Database = {
           external_link?: string | null
           id?: string
           pdf_url?: string | null
+          rubric_id?: string | null
           title?: string
           updated_at?: string
         }
@@ -57,6 +60,13 @@ export type Database = {
             columns: ["class_id"]
             isOneToOne: false
             referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_rubric_id_fkey"
+            columns: ["rubric_id"]
+            isOneToOne: false
+            referencedRelation: "rubrics"
             referencedColumns: ["id"]
           },
         ]
@@ -302,6 +312,11 @@ export type Database = {
           name: string
           rubric_id: string
           sort_order: number
+          student_criteria_developing: string | null
+          student_criteria_excellent: string | null
+          student_criteria_good: string | null
+          student_criteria_needs_improvement: string | null
+          weight: number | null
         }
         Insert: {
           created_at?: string
@@ -315,6 +330,11 @@ export type Database = {
           name: string
           rubric_id: string
           sort_order?: number
+          student_criteria_developing?: string | null
+          student_criteria_excellent?: string | null
+          student_criteria_good?: string | null
+          student_criteria_needs_improvement?: string | null
+          weight?: number | null
         }
         Update: {
           created_at?: string
@@ -328,6 +348,11 @@ export type Database = {
           name?: string
           rubric_id?: string
           sort_order?: number
+          student_criteria_developing?: string | null
+          student_criteria_excellent?: string | null
+          student_criteria_good?: string | null
+          student_criteria_needs_improvement?: string | null
+          weight?: number | null
         }
         Relationships: [
           {
@@ -393,11 +418,14 @@ export type Database = {
       student_submissions: {
         Row: {
           ai_feedback: string | null
+          ai_scores: Json | null
           assignment_id: string
           content: string | null
           created_at: string
+          grading_completed_at: string | null
           handwriting_image_url: string | null
           id: string
+          overall_grade: number | null
           score: number | null
           status: string
           student_id: string
@@ -407,11 +435,14 @@ export type Database = {
         }
         Insert: {
           ai_feedback?: string | null
+          ai_scores?: Json | null
           assignment_id: string
           content?: string | null
           created_at?: string
+          grading_completed_at?: string | null
           handwriting_image_url?: string | null
           id?: string
+          overall_grade?: number | null
           score?: number | null
           status?: string
           student_id: string
@@ -421,11 +452,14 @@ export type Database = {
         }
         Update: {
           ai_feedback?: string | null
+          ai_scores?: Json | null
           assignment_id?: string
           content?: string | null
           created_at?: string
+          grading_completed_at?: string | null
           handwriting_image_url?: string | null
           id?: string
+          overall_grade?: number | null
           score?: number | null
           status?: string
           student_id?: string

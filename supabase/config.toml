@@ -11,3 +11,6 @@ verify_jwt = true
 
 [functions.translate]
 verify_jwt = true
+
+[functions.grade-submission]
+verify_jwt = true
