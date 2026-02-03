@@ -12,19 +12,42 @@ import LanguageSelector from "@/components/LanguageSelector";
 const Index = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const [showParentDialog, setShowParentDialog] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserName(session.user.id);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserName(session.user.id);
+      } else {
+        setUserName(null);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchUserName = async (userId: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", userId)
+      .single();
+    
+    if (data?.full_name) {
+      // Get first name only for a friendlier greeting
+      const firstName = data.full_name.split(" ")[0];
+      setUserName(firstName);
+    }
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -114,7 +137,7 @@ const Index = () => {
           {/* Welcome Text */}
           <div className="text-center space-y-3">
             <h1 className="text-3xl md:text-4xl font-semibold text-foreground">
-              Welcome to TraceLab
+              {userName ? `Welcome back, ${userName}!` : "Welcome to TraceLab"}
             </h1>
             <p className="text-lg text-muted-foreground">
               Choose how you'll use your TraceLab today.
