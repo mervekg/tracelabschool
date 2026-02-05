@@ -1,11 +1,12 @@
 import { useState, useRef } from "react";
-import { Upload, FileText, Image, X, Eye, Loader2, AlertCircle } from "lucide-react";
+import { Upload, FileText, Image, X, Eye, Loader2, AlertCircle, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface FileUploadSubmissionProps {
   onFileUploaded: (url: string, fileType: string) => void;
@@ -18,6 +19,7 @@ interface FileUploadSubmissionProps {
   label?: string;
   description?: string;
   className?: string;
+  showCameraOption?: boolean;
 }
 
 const FileUploadSubmission = ({
@@ -31,6 +33,7 @@ const FileUploadSubmission = ({
   label = "Upload your work",
   description = "Drag and drop a file, or click to browse. Supports PDF, JPEG, PNG images.",
   className = "",
+  showCameraOption = true,
 }: FileUploadSubmissionProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialFileUrl);
@@ -38,6 +41,8 @@ const FileUploadSubmission = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
 
   const getFileIcon = (mimeType: string) => {
     if (mimeType.startsWith("image/")) return <Image className="w-8 h-8 text-primary" />;
@@ -163,12 +168,25 @@ const FileUploadSubmission = ({
     }
   };
 
+  const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFileChange(e.target.files[0]);
+    }
+  };
+
+  const openCamera = () => {
+    cameraInputRef.current?.click();
+  };
+
   const removeFile = () => {
     setFile(null);
     setPreviewUrl(null);
     setUploadProgress(0);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
+    }
+    if (cameraInputRef.current) {
+      cameraInputRef.current.value = "";
     }
     onFileRemoved?.();
   };
@@ -184,39 +202,65 @@ const FileUploadSubmission = ({
       <Label className="mb-2 block">{label}</Label>
       
       {!file && !initialFileUrl ? (
-        <div
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-          className={`
-            relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
-            transition-all duration-200
-            ${dragActive 
-              ? "border-primary bg-primary/5" 
-              : "border-muted-foreground/30 hover:border-primary/50 hover:bg-muted/50"
-            }
-          `}
-        >
+        <div className="space-y-3">
+          {/* Camera capture button for mobile */}
+          {showCameraOption && isMobile && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={openCamera}
+              className="w-full h-14 border-2 border-dashed border-primary/50 bg-primary/5 hover:bg-primary/10"
+            >
+              <Camera className="w-5 h-5 mr-2 text-primary" />
+              <span className="font-medium">Take Photo of Paper Work</span>
+            </Button>
+          )}
+
+          {/* Hidden camera input */}
           <Input
-            ref={fileInputRef}
+            ref={cameraInputRef}
             type="file"
-            accept={acceptedTypes}
-            onChange={handleInputChange}
+            accept="image/*"
+            capture="environment"
+            onChange={handleCameraCapture}
             className="hidden"
           />
-          
-          <Upload className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-          <p className="text-sm font-medium text-foreground mb-1">
-            {dragActive ? "Drop your file here" : "Click to upload or drag & drop"}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {description}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Max size: {maxSizeMB}MB
-          </p>
+
+          {/* File upload drop zone */}
+          <div
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            className={`
+              relative border-2 border-dashed rounded-lg p-6 sm:p-8 text-center cursor-pointer
+              transition-all duration-200
+              ${dragActive 
+                ? "border-primary bg-primary/5" 
+                : "border-muted-foreground/30 hover:border-primary/50 hover:bg-muted/50"
+              }
+            `}
+          >
+            <Input
+              ref={fileInputRef}
+              type="file"
+              accept={acceptedTypes}
+              onChange={handleInputChange}
+              className="hidden"
+            />
+            
+            <Upload className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 text-muted-foreground" />
+            <p className="text-sm font-medium text-foreground mb-1">
+              {dragActive ? "Drop your file here" : isMobile ? "Tap to upload file" : "Click to upload or drag & drop"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {description}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Max size: {maxSizeMB}MB
+            </p>
+          </div>
         </div>
       ) : (
         <Card className="overflow-hidden">
