@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { ArrowLeft, User, Clock, CheckCircle, AlertCircle, Download, FileText, Link, ExternalLink } from "lucide-react";
+import { ArrowLeft, User, Clock, CheckCircle, AlertCircle, Download, FileText, ExternalLink, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import TeacherUploadDialog from "./TeacherUploadDialog";
 
 interface StudentSubmission {
   id: string;
@@ -32,18 +33,23 @@ interface Assignment {
 interface StudentSubmissionsListProps {
   assignment: Assignment;
   submissions: StudentSubmission[];
+  classId: string;
   onBack: () => void;
   onSelectSubmission: (submission: StudentSubmission) => void;
+  onRefresh?: () => void;
 }
 
 const StudentSubmissionsList = ({ 
   assignment, 
-  submissions, 
+  submissions,
+  classId,
   onBack, 
-  onSelectSubmission 
+  onSelectSubmission,
+  onRefresh,
 }: StudentSubmissionsListProps) => {
   const { toast } = useToast();
   const [downloading, setDownloading] = useState(false);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -189,15 +195,35 @@ const StudentSubmissionsList = ({
             </p>
           </div>
         </div>
-        <Button 
-          variant="outline" 
-          onClick={downloadAllSubmissions}
-          disabled={downloading || submissions.length === 0}
-        >
-          <Download className="w-4 h-4 mr-2" />
-          {downloading ? "Downloading..." : "Download All"}
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Upload Paper Test Button */}
+          <Button 
+            variant="outline" 
+            onClick={() => setUploadDialogOpen(true)}
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Upload Paper Test
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={downloadAllSubmissions}
+            disabled={downloading || submissions.length === 0}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            {downloading ? "Downloading..." : "Download All"}
+          </Button>
+        </div>
       </div>
+
+      {/* Teacher Upload Dialog */}
+      <TeacherUploadDialog
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        assignmentId={assignment.id}
+        assignmentTitle={assignment.title}
+        classId={classId}
+        onUploadComplete={() => onRefresh?.()}
+      />
 
       {/* Assignment Details */}
       <Card>
