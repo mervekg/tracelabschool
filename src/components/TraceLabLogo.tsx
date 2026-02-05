@@ -10,10 +10,10 @@ interface TraceLabLogoProps {
 }
 
 const sizeConfig = {
-  sm: { height: 36 },
-  md: { height: 48 },
-  lg: { height: 64 },
-  xl: { height: 80 },
+  sm: { mobile: 28, desktop: 36 },
+  md: { mobile: 36, desktop: 48 },
+  lg: { mobile: 48, desktop: 64 },
+  xl: { mobile: 56, desktop: 80 },
 };
 
 const TraceLabLogo = ({ size = "md", className, linkTo = "/" }: TraceLabLogoProps) => {
@@ -21,11 +21,19 @@ const TraceLabLogo = ({ size = "md", className, linkTo = "/" }: TraceLabLogoProp
 
   const logoContent = (
     <div className={cn("flex items-center", className)}>
+      {/* Mobile logo */}
       <img 
         src={traceLabLogoImage} 
         alt="TraceLab - Educational Assessment Platform" 
-        style={{ height: config.height }}
-        className="object-contain"
+        className="object-contain md:hidden"
+        style={{ height: config.mobile }}
+      />
+      {/* Desktop logo */}
+      <img 
+        src={traceLabLogoImage} 
+        alt="TraceLab - Educational Assessment Platform" 
+        className="object-contain hidden md:block"
+        style={{ height: config.desktop }}
       />
     </div>
   );
