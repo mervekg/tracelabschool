@@ -9,6 +9,8 @@ import QuestionPanel from "@/components/workspace/QuestionPanel";
 import CanvasToolbar from "@/components/workspace/CanvasToolbar";
 import ShapesPanel from "@/components/workspace/ShapesPanel";
 import { ProblemCanvas, ProblemCanvasRef, ToolType, BackgroundType } from "@/components/workspace/ProblemCanvas";
+import SubmissionInputTabs from "@/components/student/SubmissionInputTabs";
+import { Card } from "@/components/ui/card";
 
 // Mock question for demo
 const mockQuestion = {
@@ -33,6 +35,11 @@ const StudentProblemWorkspace = () => {
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // File upload state
+  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
+  const [uploadedFileType, setUploadedFileType] = useState<string | null>(null);
+  const [submissionMode, setSubmissionMode] = useState<"handwriting" | "upload">("handwriting");
 
   const handleUndo = () => canvasRef.current?.undo();
   const handleRedo = () => canvasRef.current?.redo();
@@ -47,14 +54,28 @@ const StudentProblemWorkspace = () => {
     setTool("select");
   };
 
+  const handleFileUploaded = (url: string, fileType: string) => {
+    setUploadedFileUrl(url);
+    setUploadedFileType(fileType);
+    setSubmissionMode("upload");
+  };
+
+  const handleFileRemoved = () => {
+    setUploadedFileUrl(null);
+    setUploadedFileType(null);
+  };
+
   const handleSaveDraft = async () => {
     setIsSaving(true);
     try {
-      const imageData = canvasRef.current?.getImageData();
-      if (!imageData) throw new Error("No canvas data");
-
-      // In a real implementation, upload to storage
-      console.log("Draft saved:", imageData.substring(0, 100) + "...");
+      // Save based on submission mode
+      if (submissionMode === "upload" && uploadedFileUrl) {
+        console.log("Draft saved with file:", uploadedFileUrl);
+      } else {
+        const imageData = canvasRef.current?.getImageData();
+        if (!imageData) throw new Error("No canvas data");
+        console.log("Draft saved:", imageData.substring(0, 100) + "...");
+      }
       toast.success("Draft saved!");
     } catch (error) {
       console.error("Save error:", error);
@@ -71,16 +92,24 @@ const StudentProblemWorkspace = () => {
 
     setIsSubmitting(true);
     try {
-      const imageData = canvasRef.current?.getImageData();
-      if (!imageData) throw new Error("No canvas data");
+      let imageData: string | null = null;
+      let fileUrl: string | null = null;
+
+      if (submissionMode === "upload" && uploadedFileUrl) {
+        fileUrl = uploadedFileUrl;
+      } else {
+        imageData = canvasRef.current?.getImageData() || null;
+        if (!imageData) throw new Error("No canvas data");
+      }
 
       // Call the analyze-solution edge function
       const { data, error } = await supabase.functions.invoke("analyze-solution", {
         body: {
-          imageData,
+          imageData: imageData || fileUrl,
           questionText: mockQuestion.text,
           subject: mockQuestion.subject,
           gradeLevel: "High School",
+          isFileUpload: submissionMode === "upload",
         },
       });
 
@@ -98,10 +127,50 @@ const StudentProblemWorkspace = () => {
       setIsSubmitting(false);
     }
   };
+  // Canvas content for the tabs component
+  const canvasContent = (
+    <div className="space-y-3">
+      {/* Toolbar */}
+      <div className="flex justify-center">
+        <CanvasToolbar
+          tool={tool}
+          setTool={setTool}
+          penColor={penColor}
+          setPenColor={setPenColor}
+          penThickness={penThickness}
+          setPenThickness={setPenThickness}
+          backgroundType={backgroundType}
+          setBackgroundType={setBackgroundType}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          onClear={handleClear}
+        />
+      </div>
+
+      {/* Canvas with Shapes Panel */}
+      <div className="flex gap-3 h-[400px] md:h-[500px]">
+        {/* Main Canvas */}
+        <div className="flex-1 rounded-lg border border-border shadow-sm overflow-hidden">
+          <ProblemCanvas
+            ref={canvasRef}
+            penColor={penColor}
+            penThickness={penThickness}
+            tool={tool}
+            backgroundType={backgroundType}
+          />
+        </div>
+
+        {/* Shapes Panel */}
+        <div className="shrink-0 hidden md:block">
+          <ShapesPanel onAddShape={handleAddShape} />
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <StudentLayout>
-      <div className="h-[calc(100vh-64px)] flex flex-col bg-background">
+      <div className="h-[calc(100vh-64px)] flex flex-col bg-background overflow-y-auto">
         {/* Question Panel - Fixed top ~20% */}
         <div className="shrink-0">
           <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-background">
@@ -118,51 +187,33 @@ const StudentProblemWorkspace = () => {
           />
         </div>
 
-        {/* Workspace Canvas - ~80% */}
+        {/* Workspace Area with Tabs */}
         <div className="flex-1 flex flex-col p-4 min-h-0">
-          {/* Toolbar */}
-          <div className="shrink-0 flex justify-center mb-3">
-            <CanvasToolbar
-              tool={tool}
-              setTool={setTool}
-              penColor={penColor}
-              setPenColor={setPenColor}
-              penThickness={penThickness}
-              setPenThickness={setPenThickness}
-              backgroundType={backgroundType}
-              setBackgroundType={setBackgroundType}
-              onUndo={handleUndo}
-              onRedo={handleRedo}
-              onClear={handleClear}
-            />
-          </div>
-
-          {/* Canvas with Shapes Panel */}
-          <div className="flex-1 flex gap-3 min-h-0">
-            {/* Main Canvas */}
-            <div className="flex-1 rounded-lg border border-border shadow-sm overflow-hidden">
-              <ProblemCanvas
-                ref={canvasRef}
-                penColor={penColor}
-                penThickness={penThickness}
-                tool={tool}
-                backgroundType={backgroundType}
-              />
-            </div>
-
-            {/* Shapes Panel */}
-            <div className="shrink-0">
-              <ShapesPanel onAddShape={handleAddShape} />
-            </div>
-          </div>
+          {/* Submission Input Tabs: Handwriting vs Upload */}
+          <SubmissionInputTabs
+            canvasContent={canvasContent}
+            onFileUploaded={handleFileUploaded}
+            onFileRemoved={handleFileRemoved}
+            assignmentId={mockQuestion.id}
+            uploadLabel="Upload your work"
+            uploadDescription="Take a photo of your paper test or upload a scanned PDF/image."
+            className="flex-1"
+          />
 
           {/* Submit Actions */}
-          <div className="shrink-0 flex justify-between items-center mt-4 pt-4 border-t border-border">
+          <div className="shrink-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mt-4 pt-4 border-t border-border">
             <p className="text-sm text-muted-foreground">
-              Show all your work, including diagrams, formulas, and calculations.
+              {submissionMode === "upload" && uploadedFileUrl
+                ? "File ready for submission"
+                : "Show all your work, including diagrams, formulas, and calculations."}
             </p>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleSaveDraft} disabled={isSaving}>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button 
+                variant="outline" 
+                onClick={handleSaveDraft} 
+                disabled={isSaving}
+                className="flex-1 sm:flex-none"
+              >
                 {isSaving ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
@@ -172,8 +223,8 @@ const StudentProblemWorkspace = () => {
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="bg-gradient-to-r from-primary to-primary/80"
+                disabled={isSubmitting || (submissionMode === "upload" && !uploadedFileUrl)}
+                className="bg-gradient-to-r from-primary to-primary/80 flex-1 sm:flex-none"
               >
                 {isSubmitting ? (
                   <>

@@ -682,8 +682,10 @@ const TeacherClassDetail = () => {
               <StudentSubmissionsList
                 assignment={selectedAssignment}
                 submissions={submissions}
+                classId={classId!}
                 onBack={handleBackToAssignments}
                 onSelectSubmission={handleSelectSubmission}
+                onRefresh={fetchClassData}
               />
             ) : (
               <AssignmentsList
