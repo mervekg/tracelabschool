@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import TraceLabLogo from "@/components/TraceLabLogo";
+import SolviaLogo from "@/components/SolviaLogo";
 import RoleSelector, { type SignupRole } from "@/components/auth/RoleSelector";
 import TeacherSignupFields from "@/components/auth/TeacherSignupFields";
 import PasswordRequirements, { validatePassword } from "@/components/auth/PasswordRequirements";
@@ -291,7 +291,7 @@ const Auth = () => {
         <Card className="w-full max-w-md p-8 shadow-card">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-2">
-              <TraceLabLogo size="lg" />
+              <SolviaLogo size="lg" />
             </div>
             <p className="text-muted-foreground">Welcome back</p>
           </div>

@@ -31,7 +31,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem("tracelab-language");
+    const saved = localStorage.getItem("solvia-language");
     return (saved as Language) || "en";
   });
   const [isTranslating, setIsTranslating] = useState(false);
@@ -39,7 +39,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem("tracelab-language", lang);
+    localStorage.setItem("solvia-language", lang);
   }, []);
 
   const getLanguageLabel = useCallback((code: Language) => {

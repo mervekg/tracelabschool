@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import TraceLabLogo from "@/components/TraceLabLogo";
+import SolviaLogo from "@/components/SolviaLogo";
 
 const StudentAnalysis = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const StudentAnalysis = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <TraceLabLogo size="sm" showText={false} />
+            <SolviaLogo size="sm" showText={false} />
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-1">Analysis Complete</h1>
               <p className="text-sm text-muted-foreground">Paragraph Writing: My Weekend</p>

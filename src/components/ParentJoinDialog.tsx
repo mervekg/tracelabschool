@@ -34,7 +34,7 @@ const ParentJoinDialog = ({ open, onOpenChange }: ParentJoinDialogProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl">Join your child's TraceLab space</DialogTitle>
+          <DialogTitle className="text-xl">Join your child's Solvia space</DialogTitle>
           <DialogDescription className="text-muted-foreground">
             Use the QR code or invite code your child's teacher shared with you. 
             You'll only see your own child's learning traces.
