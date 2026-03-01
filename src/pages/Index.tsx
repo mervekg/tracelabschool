@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import TraceLabLogo from "@/components/TraceLabLogo";
+import SolviaLogo from "@/components/SolviaLogo";
 import ParentJoinDialog from "@/components/ParentJoinDialog";
 import LanguageSelector from "@/components/LanguageSelector";
 
@@ -104,7 +104,7 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Sticky App Bar */}
       <header className="sticky top-0 z-50 w-full px-6 py-4 flex justify-between items-center border-b border-border/50 bg-background/95 backdrop-blur-sm">
-        <TraceLabLogo size="lg" linkTo="/" />
+        <SolviaLogo size="lg" linkTo="/" />
         <div className="flex items-center gap-2">
           <LanguageSelector variant="icon" />
           {user ? (
@@ -137,10 +137,10 @@ const Index = () => {
           {/* Welcome Text */}
           <div className="text-center space-y-3">
             <h1 className="text-3xl md:text-4xl font-semibold text-foreground">
-              {userName ? `Welcome back, ${userName}!` : "Welcome to TraceLab"}
+              {userName ? `Welcome back, ${userName}!` : "Welcome to Solvia"}
             </h1>
             <p className="text-lg text-muted-foreground">
-              Choose how you'll use your TraceLab today.
+              Choose how you'll use Solvia today.
             </p>
           </div>
 
