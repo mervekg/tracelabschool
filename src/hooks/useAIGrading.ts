@@ -1,51 +1,65 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Rubric, AIGradingResult } from "@/components/rubric/RubricTypes";
 import { toast } from "sonner";
 
+interface DimensionScore {
+  dimension: string;
+  level: string;
+  points: number;
+  max_points: number;
+  teacher_rationale: string;
+  student_feedback: string;
+}
+
+export interface AIGradeResult {
+  per_dimension_scores: DimensionScore[];
+  overall: {
+    total_points: number;
+    max_points: number;
+    percent: number;
+    summary_for_teacher: string;
+    summary_for_student: string;
+  };
+}
+
+interface GradeSubmissionParams {
+  submissionId: string;
+  subject: string;
+  gradeLevel: string;
+  taskType: string;
+  taskPrompt: string;
+  rubricText: string;
+  markScheme?: string;
+  maxPoints: number;
+}
+
 interface UseAIGradingOptions {
-  onSuccess?: (result: AIGradingResult) => void;
+  onSuccess?: (result: AIGradeResult) => void;
   onError?: (error: Error) => void;
 }
 
 export function useAIGrading(options: UseAIGradingOptions = {}) {
   const [isGrading, setIsGrading] = useState(false);
-  const [gradingResult, setGradingResult] = useState<AIGradingResult | null>(null);
+  const [gradingResult, setGradingResult] = useState<AIGradeResult | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
   const gradeSubmission = useCallback(
-    async ({
-      submissionId,
-      studentContent,
-      rubric,
-      gradeLevel,
-      subject,
-    }: {
-      submissionId?: string;
-      studentContent: string;
-      rubric: Rubric;
-      gradeLevel: string;
-      subject: string;
-    }) => {
+    async (params: GradeSubmissionParams) => {
       setIsGrading(true);
       setError(null);
 
       try {
         const { data, error: fnError } = await supabase.functions.invoke("grade-submission", {
-          body: {
-            submissionId,
-            studentContent,
-            rubric,
-            gradeLevel,
-            subject,
-          },
+          body: params,
         });
 
         if (fnError) throw fnError;
+        if (data?.error) throw new Error(data.error);
 
-        setGradingResult(data);
-        options.onSuccess?.(data);
-        return data;
+        const result = data as AIGradeResult;
+        setGradingResult(result);
+        options.onSuccess?.(result);
+        return result;
       } catch (err) {
         const error = err instanceof Error ? err : new Error("Unknown grading error");
         setError(error);
