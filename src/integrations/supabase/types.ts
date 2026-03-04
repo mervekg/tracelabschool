@@ -227,6 +227,51 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          assignment_id: string | null
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          assignment_id?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          assignment_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parents: {
         Row: {
           class_id: string
@@ -418,14 +463,17 @@ export type Database = {
       student_submissions: {
         Row: {
           ai_feedback: string | null
+          ai_grade_json: Json | null
           ai_scores: Json | null
           assignment_id: string
           content: string | null
           created_at: string
+          file_url: string | null
           grading_completed_at: string | null
           handwriting_image_url: string | null
           id: string
           overall_grade: number | null
+          response_text: string | null
           score: number | null
           status: string
           student_id: string
@@ -435,14 +483,17 @@ export type Database = {
         }
         Insert: {
           ai_feedback?: string | null
+          ai_grade_json?: Json | null
           ai_scores?: Json | null
           assignment_id: string
           content?: string | null
           created_at?: string
+          file_url?: string | null
           grading_completed_at?: string | null
           handwriting_image_url?: string | null
           id?: string
           overall_grade?: number | null
+          response_text?: string | null
           score?: number | null
           status?: string
           student_id: string
@@ -452,14 +503,17 @@ export type Database = {
         }
         Update: {
           ai_feedback?: string | null
+          ai_grade_json?: Json | null
           ai_scores?: Json | null
           assignment_id?: string
           content?: string | null
           created_at?: string
+          file_url?: string | null
           grading_completed_at?: string | null
           handwriting_image_url?: string | null
           id?: string
           overall_grade?: number | null
+          response_text?: string | null
           score?: number | null
           status?: string
           student_id?: string
