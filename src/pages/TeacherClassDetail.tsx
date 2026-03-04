@@ -675,6 +675,9 @@ const TeacherClassDetail = () => {
               <SubmissionReview
                 submission={selectedSubmission}
                 assignmentTitle={selectedAssignment.title}
+                assignmentDescription={selectedAssignment.description || ""}
+                gradeLevel={classInfo?.grade_level || "Middle School"}
+                subject={classInfo?.subject || "General"}
                 onBack={handleBackToSubmissions}
                 onUpdate={handleSubmissionUpdate}
               />
