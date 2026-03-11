@@ -173,8 +173,36 @@ serve(async (req) => {
   }
 
   try {
+    // ── Authenticate user ────────────────────────────────────────────
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Missing authorization header");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const userId = claimsData.claims.sub as string;
+
+    // ── Require teacher role ─────────────────────────────────────────
+    const { data: isTeacher } = await userClient.rpc("has_role", { _user_id: userId, _role: "teacher" });
+    if (!isTeacher) {
+      return new Response(JSON.stringify({ error: "Teacher access required" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const body: GradeRequest = await req.json();
     const { submissionId, subject, gradeLevel, taskType, taskPrompt, rubricText, markScheme, maxPoints } = body;
@@ -184,7 +212,6 @@ serve(async (req) => {
     if (!maxPoints || maxPoints <= 0) throw new Error("maxPoints must be a positive number");
 
     // ── Initialize Supabase (service role for DB writes) ─────────────
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
