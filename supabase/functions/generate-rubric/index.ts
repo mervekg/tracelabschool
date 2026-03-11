@@ -52,6 +52,15 @@ serve(async (req) => {
       });
     }
 
+    let reqBody: RubricRequest;
+    try {
+      reqBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON in request body" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
     const { 
       assignmentContent, 
       gradeLevel, 
@@ -59,7 +68,7 @@ serve(async (req) => {
       customInstructions,
       questionType = "initial",
       previousAnswers 
-    }: RubricRequest = await req.json();
+    } = reqBody;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {

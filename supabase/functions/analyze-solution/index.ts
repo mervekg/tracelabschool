@@ -81,7 +81,16 @@ serve(async (req) => {
       });
     }
 
-    const { imageData, questionText, subject, gradeLevel, rubric, submissionId }: AnalysisRequest = await req.json();
+    let requestBody: AnalysisRequest;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON in request body" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const { imageData, questionText, subject, gradeLevel, rubric, submissionId } = requestBody;
 
     if (!imageData || !questionText) {
       throw new Error("Missing required fields: imageData, questionText");

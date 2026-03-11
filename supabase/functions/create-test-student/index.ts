@@ -44,7 +44,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    const body: RequestBody = await req.json();
+    let body: RequestBody;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ success: false, error: "Invalid JSON in request body" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
     const { email, password, classId, fullName } = body;
 
     if (!email || !password || !classId) {

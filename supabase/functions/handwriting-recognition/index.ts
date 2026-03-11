@@ -67,7 +67,17 @@ serve(async (req) => {
       );
     }
 
-    const { image } = await req.json();
+    let body: Record<string, unknown>;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const image = typeof body.image === 'string' ? body.image : null;
 
     // Validate image data exists
     if (!image) {
