@@ -204,7 +204,15 @@ serve(async (req) => {
       });
     }
 
-    const body: GradeRequest = await req.json();
+    let body: GradeRequest;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON in request body" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
     const { submissionId, subject, gradeLevel, taskType, taskPrompt, rubricText, markScheme, maxPoints } = body;
 
     if (!submissionId) throw new Error("submissionId is required");

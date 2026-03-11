@@ -44,7 +44,26 @@ serve(async (req) => {
       });
     }
 
-    const { text, texts, targetLanguage } = await req.json();
+    let reqBody: Record<string, unknown>;
+    try {
+      reqBody = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const text = typeof reqBody.text === 'string' ? reqBody.text : undefined;
+    const texts = Array.isArray(reqBody.texts) ? reqBody.texts.filter((t: unknown) => typeof t === 'string') as string[] : undefined;
+    const targetLanguage = typeof reqBody.targetLanguage === 'string' ? reqBody.targetLanguage : '';
+
+    if (!targetLanguage) {
+      return new Response(
+        JSON.stringify({ error: 'targetLanguage is required' }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
