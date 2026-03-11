@@ -100,28 +100,28 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 220 25% 10%;
-    --foreground: 180 20% 95%;
+    --background: 265 20% 8%;
+    --foreground: 135 15% 95%;
 
-    --card: 220 25% 14%;
-    --card-foreground: 180 20% 95%;
+    --card: 265 20% 12%;
+    --card-foreground: 135 15% 95%;
 
-    --popover: 220 25% 16%;
-    --popover-foreground: 180 20% 95%;
+    --popover: 265 20% 14%;
+    --popover-foreground: 135 15% 95%;
 
-    --primary: 175 65% 50%;
-    --primary-foreground: 180 30% 10%;
+    --primary: 130 60% 50%;
+    --primary-foreground: 265 25% 8%;
 
-    --secondary: 180 40% 70%;
-    --secondary-foreground: 220 25% 10%;
+    --secondary: 275 50% 65%;
+    --secondary-foreground: 265 20% 8%;
 
-    --muted: 220 20% 35%;
-    --muted-foreground: 180 15% 75%;
+    --muted: 260 15% 30%;
+    --muted-foreground: 135 10% 75%;
 
-    --accent: 175 30% 20%;
-    --accent-foreground: 175 50% 70%;
+    --accent: 135 25% 18%;
+    --accent-foreground: 135 45% 65%;
 
-    --success: 155 65% 50%;
+    --success: 145 65% 48%;
     --success-foreground: 0 0% 100%;
 
     --warning: 40 90% 55%;
@@ -130,28 +130,28 @@ All colors MUST be HSL.
     --destructive: 0 80% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 25%;
-    --input: 220 20% 25%;
-    --ring: 175 65% 50%;
+    --border: 265 15% 22%;
+    --input: 265 15% 22%;
+    --ring: 130 60% 50%;
 
-    --paper-gradient: linear-gradient(145deg, hsl(180 15% 12%) 0%, hsl(180 12% 10%) 100%);
-    --paper-line: 220 15% 28%;
+    --paper-gradient: linear-gradient(145deg, hsl(270 12% 10%) 0%, hsl(135 8% 8%) 100%);
+    --paper-line: 260 12% 25%;
 
     --shadow-paper: 0 2px 8px -2px hsl(0 0% 0% / 0.35), 0 4px 16px -4px hsl(0 0% 0% / 0.25);
     --shadow-card: 0 4px 12px -2px hsl(0 0% 0% / 0.45), 0 8px 24px -6px hsl(0 0% 0% / 0.35);
-    --chart-1: 175 65% 55%;
-    --chart-2: 185 60% 60%;
-    --chart-3: 195 50% 55%;
-    --chart-4: 205 45% 50%;
-    --chart-5: 165 55% 50%;
-    --sidebar: 220 25% 14%;
-    --sidebar-foreground: 180 20% 95%;
-    --sidebar-primary: 175 65% 50%;
-    --sidebar-primary-foreground: 180 30% 10%;
-    --sidebar-accent: 175 30% 20%;
-    --sidebar-accent-foreground: 175 50% 70%;
-    --sidebar-border: 220 20% 25%;
-    --sidebar-ring: 175 65% 50%;
+    --chart-1: 130 60% 55%;
+    --chart-2: 155 50% 55%;
+    --chart-3: 275 45% 60%;
+    --chart-4: 290 40% 55%;
+    --chart-5: 145 50% 48%;
+    --sidebar: 265 20% 12%;
+    --sidebar-foreground: 135 15% 95%;
+    --sidebar-primary: 130 60% 50%;
+    --sidebar-primary-foreground: 265 25% 8%;
+    --sidebar-accent: 135 25% 18%;
+    --sidebar-accent-foreground: 135 45% 65%;
+    --sidebar-border: 265 15% 22%;
+    --sidebar-ring: 130 60% 50%;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
