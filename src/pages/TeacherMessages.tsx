@@ -122,13 +122,26 @@ const TeacherMessages = () => {
       return;
     }
 
-    // If sendAsEmail is true, we would call an edge function here
-    // For now, we just mark it as sent
     if (sendAsEmail) {
-      toast({ 
-        title: "Message Saved", 
-        description: "Email sending will be available once configured" 
-      });
+      try {
+        const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-email', {
+          body: {
+            to: recipientEmail,
+            subject,
+            html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #1a8a4a;">${subject}</h2>
+              <div style="white-space: pre-wrap; line-height: 1.6;">${body}</div>
+              <hr style="margin-top: 24px; border-color: #e5e5e5;" />
+              <p style="font-size: 12px; color: #888;">Sent via Solvia</p>
+            </div>`,
+          },
+        });
+        if (emailError) throw emailError;
+        toast({ title: "Message Sent", description: "Email delivered successfully" });
+      } catch (emailErr: any) {
+        console.error('Email send error:', emailErr);
+        toast({ title: "Message Saved", description: "Message saved but email delivery failed", variant: "destructive" });
+      }
     } else {
       toast({ title: "Message Sent", description: "Message saved successfully" });
     }
