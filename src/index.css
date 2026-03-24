@@ -2,41 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Solvia Design System — Dark professional with warm gold accents
+   Inspired by educational analytics dashboards. Student-friendly warmth meets professional clarity.
+   All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Light base with subtle green tint */
-    --background: 150 12% 97%;
-    --foreground: 260 20% 15%;
+    /* Clean light mode — warm navy-tinted neutrals */
+    --background: 220 20% 96%;
+    --foreground: 220 25% 12%;
 
-    /* Card surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 260 20% 15%;
+    --card-foreground: 220 25% 12%;
 
-    --popover: 150 10% 96%;
-    --popover-foreground: 260 20% 15%;
+    --popover: 220 15% 97%;
+    --popover-foreground: 220 25% 12%;
 
-    /* Primary — vivid green from the image */
-    --primary: 130 65% 40%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary — warm gold/amber */
+    --primary: 38 75% 55%;
+    --primary-foreground: 220 30% 8%;
 
-    /* Secondary — rich purple from the image */
-    --secondary: 270 55% 45%;
+    /* Secondary — teal-green */
+    --secondary: 160 50% 40%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Muted neutrals with slight violet undertone */
-    --muted: 260 10% 78%;
-    --muted-foreground: 260 15% 35%;
+    /* Muted neutrals */
+    --muted: 220 12% 82%;
+    --muted-foreground: 220 10% 40%;
 
-    /* Accent — light green tint */
-    --accent: 135 30% 92%;
-    --accent-foreground: 135 50% 28%;
+    /* Accent — soft warm tint */
+    --accent: 38 30% 94%;
+    --accent-foreground: 38 60% 30%;
 
-    /* Success — bright green */
-    --success: 145 70% 42%;
+    /* Success — teal green */
+    --success: 160 60% 42%;
     --success-foreground: 0 0% 100%;
 
     /* Warning */
@@ -46,44 +46,38 @@ All colors MUST be HSL.
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders and inputs */
-    --border: 260 12% 88%;
-    --input: 260 12% 88%;
-    --ring: 130 65% 40%;
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 38 75% 55%;
 
     --radius: 0.625rem;
 
-    /* Paper texture gradient */
-    --paper-gradient: linear-gradient(145deg, hsl(135 12% 98%) 0%, hsl(270 8% 96%) 100%);
+    --paper-gradient: linear-gradient(145deg, hsl(220 12% 97%) 0%, hsl(38 8% 96%) 100%);
+    --paper-line: 220 10% 82%;
 
-    /* Handwriting paper lines */
-    --paper-line: 260 10% 82%;
+    /* Role-based gradients */
+    --gradient-student: linear-gradient(135deg, hsl(160 50% 42%) 0%, hsl(180 45% 45%) 100%);
+    --gradient-teacher: linear-gradient(135deg, hsl(38 70% 50%) 0%, hsl(25 65% 55%) 100%);
+    --gradient-parent: linear-gradient(135deg, hsl(160 55% 45%) 0%, hsl(145 50% 50%) 100%);
+    --gradient-admin: linear-gradient(135deg, hsl(220 45% 35%) 0%, hsl(230 40% 45%) 100%);
 
-    /* Role-based gradients — green ↔ purple spectrum */
-    --gradient-student: linear-gradient(135deg, hsl(130 60% 45%) 0%, hsl(160 50% 50%) 100%);
-    --gradient-teacher: linear-gradient(135deg, hsl(270 50% 50%) 0%, hsl(290 45% 55%) 100%);
-    --gradient-parent: linear-gradient(135deg, hsl(145 55% 45%) 0%, hsl(130 50% 50%) 100%);
-    --gradient-admin: linear-gradient(135deg, hsl(265 55% 45%) 0%, hsl(280 50% 50%) 100%);
-
-    /* Smooth transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-    /* Shadows with green/purple tint */
-    --shadow-paper: 0 2px 8px -2px hsl(270 20% 40% / 0.1), 0 4px 16px -4px hsl(130 20% 40% / 0.06);
-    --shadow-card: 0 4px 12px -2px hsl(270 20% 40% / 0.12), 0 8px 24px -6px hsl(130 20% 40% / 0.08);
-    --chart-1: 130 65% 45%;
-    --chart-2: 155 55% 48%;
-    --chart-3: 270 50% 55%;
-    --chart-4: 285 45% 50%;
-    --chart-5: 145 60% 42%;
+    --shadow-paper: 0 2px 8px -2px hsl(220 20% 40% / 0.1), 0 4px 16px -4px hsl(38 20% 40% / 0.06);
+    --shadow-card: 0 4px 12px -2px hsl(220 20% 40% / 0.12), 0 8px 24px -6px hsl(38 20% 40% / 0.08);
+    --chart-1: 38 75% 55%;
+    --chart-2: 160 50% 45%;
+    --chart-3: 220 45% 50%;
+    --chart-4: 25 60% 50%;
+    --chart-5: 180 45% 42%;
     --sidebar: 0 0% 100%;
-    --sidebar-foreground: 260 20% 15%;
-    --sidebar-primary: 130 65% 40%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 135 30% 92%;
-    --sidebar-accent-foreground: 135 50% 28%;
-    --sidebar-border: 260 12% 88%;
-    --sidebar-ring: 130 65% 40%;
+    --sidebar-foreground: 220 25% 12%;
+    --sidebar-primary: 38 75% 55%;
+    --sidebar-primary-foreground: 220 30% 8%;
+    --sidebar-accent: 38 30% 94%;
+    --sidebar-accent-foreground: 38 60% 30%;
+    --sidebar-border: 220 15% 88%;
+    --sidebar-ring: 38 75% 55%;
     --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
     --font-serif: 'Lora', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
     --font-mono: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
@@ -100,58 +94,61 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 265 20% 8%;
-    --foreground: 135 15% 95%;
+    /* Deep navy — matches the reference screenshot */
+    --background: 222 25% 7%;
+    --foreground: 38 20% 88%;
 
-    --card: 265 20% 12%;
-    --card-foreground: 135 15% 95%;
+    --card: 222 22% 11%;
+    --card-foreground: 38 20% 88%;
 
-    --popover: 265 20% 14%;
-    --popover-foreground: 135 15% 95%;
+    --popover: 222 22% 13%;
+    --popover-foreground: 38 20% 88%;
 
-    --primary: 130 60% 50%;
-    --primary-foreground: 265 25% 8%;
+    /* Gold/amber primary */
+    --primary: 38 75% 55%;
+    --primary-foreground: 222 30% 7%;
 
-    --secondary: 275 50% 65%;
-    --secondary-foreground: 265 20% 8%;
+    /* Teal secondary */
+    --secondary: 160 45% 50%;
+    --secondary-foreground: 222 25% 7%;
 
-    --muted: 260 15% 30%;
-    --muted-foreground: 135 10% 75%;
+    --muted: 222 15% 22%;
+    --muted-foreground: 220 12% 55%;
 
-    --accent: 135 25% 18%;
-    --accent-foreground: 135 45% 65%;
+    --accent: 38 20% 15%;
+    --accent-foreground: 38 65% 65%;
 
-    --success: 145 65% 48%;
+    --success: 160 55% 48%;
     --success-foreground: 0 0% 100%;
 
     --warning: 40 90% 55%;
     --warning-foreground: 40 90% 10%;
 
-    --destructive: 0 80% 55%;
+    --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 265 15% 22%;
-    --input: 265 15% 22%;
-    --ring: 130 60% 50%;
+    --border: 222 18% 18%;
+    --input: 222 18% 18%;
+    --ring: 38 75% 55%;
 
-    --paper-gradient: linear-gradient(145deg, hsl(270 12% 10%) 0%, hsl(135 8% 8%) 100%);
-    --paper-line: 260 12% 25%;
+    --paper-gradient: linear-gradient(145deg, hsl(222 22% 9%) 0%, hsl(222 18% 7%) 100%);
+    --paper-line: 222 12% 20%;
 
     --shadow-paper: 0 2px 8px -2px hsl(0 0% 0% / 0.35), 0 4px 16px -4px hsl(0 0% 0% / 0.25);
     --shadow-card: 0 4px 12px -2px hsl(0 0% 0% / 0.45), 0 8px 24px -6px hsl(0 0% 0% / 0.35);
-    --chart-1: 130 60% 55%;
-    --chart-2: 155 50% 55%;
-    --chart-3: 275 45% 60%;
-    --chart-4: 290 40% 55%;
-    --chart-5: 145 50% 48%;
-    --sidebar: 265 20% 12%;
-    --sidebar-foreground: 135 15% 95%;
-    --sidebar-primary: 130 60% 50%;
-    --sidebar-primary-foreground: 265 25% 8%;
-    --sidebar-accent: 135 25% 18%;
-    --sidebar-accent-foreground: 135 45% 65%;
-    --sidebar-border: 265 15% 22%;
-    --sidebar-ring: 130 60% 50%;
+    --chart-1: 38 75% 55%;
+    --chart-2: 160 50% 50%;
+    --chart-3: 220 40% 55%;
+    --chart-4: 25 55% 55%;
+    --chart-5: 180 40% 48%;
+    --sidebar: 222 25% 9%;
+    --sidebar-foreground: 38 20% 88%;
+    --sidebar-primary: 38 75% 55%;
+    --sidebar-primary-foreground: 222 30% 7%;
+    --sidebar-accent: 38 20% 15%;
+    --sidebar-accent-foreground: 38 65% 65%;
+    --sidebar-border: 222 18% 18%;
+    --sidebar-ring: 38 75% 55%;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
