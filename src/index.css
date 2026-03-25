@@ -9,46 +9,46 @@
 
 @layer base {
   :root {
-    /* Clean light mode — warm navy-tinted neutrals */
-    --background: 220 20% 96%;
-    --foreground: 220 25% 12%;
+    /* Clean light mode — navy-tinted neutrals with coral warmth */
+    --background: 215 25% 95%;
+    --foreground: 215 40% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 12%;
+    --card-foreground: 215 40% 15%;
 
-    --popover: 220 15% 97%;
-    --popover-foreground: 220 25% 12%;
+    --popover: 215 20% 97%;
+    --popover-foreground: 215 40% 15%;
 
-    /* Primary — warm gold/amber */
-    --primary: 38 75% 55%;
-    --primary-foreground: 220 30% 8%;
+    /* Primary — coral/salmon */
+    --primary: 15 75% 55%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Secondary — teal-green */
-    --secondary: 160 50% 40%;
+    /* Secondary — light blue */
+    --secondary: 200 45% 55%;
     --secondary-foreground: 0 0% 100%;
 
     /* Muted neutrals */
-    --muted: 220 12% 82%;
-    --muted-foreground: 220 10% 40%;
+    --muted: 215 15% 82%;
+    --muted-foreground: 215 12% 40%;
 
-    /* Accent — soft warm tint */
-    --accent: 38 30% 94%;
-    --accent-foreground: 38 60% 30%;
+    /* Accent — soft blue tint */
+    --accent: 200 25% 93%;
+    --accent-foreground: 215 40% 25%;
 
-    /* Success — teal green */
-    --success: 160 60% 42%;
+    /* Success — teal */
+    --success: 160 55% 42%;
     --success-foreground: 0 0% 100%;
 
     /* Warning */
-    --warning: 40 95% 55%;
-    --warning-foreground: 40 90% 15%;
+    --warning: 40 90% 55%;
+    --warning-foreground: 40 85% 15%;
 
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 88%;
-    --input: 220 15% 88%;
-    --ring: 38 75% 55%;
+    --border: 215 18% 88%;
+    --input: 215 18% 88%;
+    --ring: 15 75% 55%;
 
     --radius: 0.625rem;
 
