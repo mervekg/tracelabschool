@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import SolviaLogo from "@/components/SolviaLogo";
 import { supabase } from "@/integrations/supabase/client";
 import LanguageSelector from "@/components/LanguageSelector";
+import ThemeToggle from "@/components/ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -87,7 +88,10 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
             </nav>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-1 md:gap-2">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {/* Language Selector */}
             <LanguageSelector variant="icon" />
 

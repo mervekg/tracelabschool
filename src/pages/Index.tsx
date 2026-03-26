@@ -8,6 +8,7 @@ import { User } from "@supabase/supabase-js";
 import SolviaLogo from "@/components/SolviaLogo";
 import ParentJoinDialog from "@/components/ParentJoinDialog";
 import LanguageSelector from "@/components/LanguageSelector";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -106,6 +107,7 @@ const Index = () => {
       <header className="sticky top-0 z-50 w-full px-6 py-4 flex justify-between items-center border-b border-border/50 bg-background/95 backdrop-blur-sm">
         <SolviaLogo size="lg" linkTo="/" />
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <LanguageSelector variant="icon" />
           {user ? (
             <Button 
