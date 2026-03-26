@@ -205,14 +205,22 @@ const StudentSubmissionsList = ({
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {/* Upload Paper Test Button */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Upload & Auto-Grade (Primary action) */}
+          <Button 
+            onClick={() => setUploadGradeDialogOpen(true)}
+            className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-primary-foreground"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            Upload & Auto-Grade
+          </Button>
+          {/* Upload Only */}
           <Button 
             variant="outline" 
             onClick={() => setUploadDialogOpen(true)}
           >
             <Upload className="w-4 h-4 mr-2" />
-            Upload Paper Test
+            Upload Only
           </Button>
           <Button 
             variant="outline" 
@@ -225,7 +233,7 @@ const StudentSubmissionsList = ({
         </div>
       </div>
 
-      {/* Teacher Upload Dialog */}
+      {/* Teacher Upload Dialog (upload only) */}
       <TeacherUploadDialog
         open={uploadDialogOpen}
         onOpenChange={setUploadDialogOpen}
@@ -233,6 +241,19 @@ const StudentSubmissionsList = ({
         assignmentTitle={assignment.title}
         classId={classId}
         onUploadComplete={() => onRefresh?.()}
+      />
+
+      {/* Upload & Auto-Grade Dialog */}
+      <TeacherUploadGradeDialog
+        open={uploadGradeDialogOpen}
+        onOpenChange={setUploadGradeDialogOpen}
+        assignmentId={assignment.id}
+        assignmentTitle={assignment.title}
+        assignmentDescription={assignment.description || undefined}
+        classId={classId}
+        gradeLevel={gradeLevel}
+        subject={subject}
+        onComplete={() => onRefresh?.()}
       />
 
       {/* FERPA Privacy Notice */}
