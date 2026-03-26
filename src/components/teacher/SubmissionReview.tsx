@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   ArrowLeft, Bot, User, Save, Sparkles, Download, Send,
-  Loader2, FileText, Image, Link as LinkIcon, CheckCircle2,
+  Loader2, FileText, Image, Link as LinkIcon, CheckCircle2, AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
