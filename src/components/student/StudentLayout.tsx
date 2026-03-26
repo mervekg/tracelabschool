@@ -88,7 +88,10 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
             </nav>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-1 md:gap-2">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {/* Language Selector */}
             <LanguageSelector variant="icon" />
 
