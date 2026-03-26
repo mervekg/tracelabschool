@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, User, Clock, CheckCircle, AlertCircle, Download, FileText, ExternalLink, Upload } from "lucide-react";
+import { ArrowLeft, User, Clock, CheckCircle, AlertCircle, Download, FileText, ExternalLink, Upload, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -224,6 +224,14 @@ const StudentSubmissionsList = ({
         classId={classId}
         onUploadComplete={() => onRefresh?.()}
       />
+
+      {/* FERPA Privacy Notice */}
+      <div className="flex items-start gap-3 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-300 dark:border-amber-700">
+        <ShieldAlert className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+        <p className="text-xs text-amber-700 dark:text-amber-400">
+          <strong className="text-amber-800 dark:text-amber-300">FERPA Reminder:</strong> When uploading scanned assessments, ensure no student names appear on the documents. Students should use nicknames or ID codes only.
+        </p>
+      </div>
 
       {/* Assignment Details */}
       <Card>
