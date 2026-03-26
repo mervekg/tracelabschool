@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Upload, User, FileCheck } from "lucide-react";
+import { Upload, User, FileCheck, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
