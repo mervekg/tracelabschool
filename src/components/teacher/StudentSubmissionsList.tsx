@@ -61,8 +61,10 @@ const StudentSubmissionsList = ({
     switch (status) {
       case "submitted":
         return <Badge variant="default">Submitted</Badge>;
+      case "graded":
+        return <Badge className="bg-amber-500 text-white">Draft Feedback</Badge>;
       case "reviewed":
-        return <Badge className="bg-green-600">Reviewed</Badge>;
+        return <Badge className="bg-green-600 text-white">Released</Badge>;
       case "pending":
       default:
         return <Badge variant="secondary">Pending</Badge>;
@@ -73,6 +75,8 @@ const StudentSubmissionsList = ({
     switch (status) {
       case "submitted":
         return <Clock className="w-4 h-4 text-primary" />;
+      case "graded":
+        return <Sparkles className="w-4 h-4 text-amber-500" />;
       case "reviewed":
         return <CheckCircle className="w-4 h-4 text-green-600" />;
       default:
