@@ -166,6 +166,17 @@ const TeacherUploadDialog = ({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {/* FERPA Privacy Reminder */}
+          <div className="flex items-start gap-3 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-300 dark:border-amber-700">
+            <ShieldAlert className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">FERPA Privacy Reminder</p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                Do <strong>not</strong> include student names on scanned assessments. Students should use <strong>nicknames or ID codes only</strong> to protect their identity under FERPA regulations.
+              </p>
+            </div>
+          </div>
+
           {/* Assignment Info */}
           <div className="p-3 bg-muted rounded-lg">
             <p className="text-sm font-medium">Assignment: {assignmentTitle}</p>
