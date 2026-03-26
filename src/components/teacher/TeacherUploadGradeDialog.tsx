@@ -298,7 +298,7 @@ const TeacherUploadGradeDialog = ({
               </div>
               <Progress value={getProgressValue()} className="h-2" />
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span className={stage !== "idle" ? "text-primary font-medium" : ""}>Upload</span>
+                <span className="text-primary font-medium">Upload</span>
                 <span className={stage === "grading" || stage === "graded" ? "text-primary font-medium" : ""}>AI Grading</span>
                 <span className={stage === "graded" ? "text-primary font-medium" : ""}>Draft Ready</span>
               </div>
