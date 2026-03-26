@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import solviaLogoImage from "@/assets/tracelab-logo.png";
+import solviaLogoImage from "@/assets/solvia-logo.png";
 
 interface SolviaLogoProps {
   size?: "sm" | "md" | "lg" | "xl";
