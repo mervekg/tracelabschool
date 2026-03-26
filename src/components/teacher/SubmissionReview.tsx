@@ -274,17 +274,23 @@ const SubmissionReview = ({
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={() => handleSave(false)} disabled={saving}>
                   <Save className="w-4 h-4 mr-2" />
-                  {saving ? "Saving..." : "Save Draft"}
+                  {saving ? "Saving..." : "Save as Draft"}
                 </Button>
                 <Button
-                  className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
+                  className="flex-1 bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-primary-foreground"
                   onClick={() => handleSave(true)}
                   disabled={saving}
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  Send Feedback
+                  Release to Student
                 </Button>
               </div>
+              {submission.status === "graded" && (
+                <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-1">
+                  <AlertCircle className="w-3 h-3" />
+                  This feedback is in draft — the student cannot see it until you release it.
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
