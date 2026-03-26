@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { ArrowLeft, User, Clock, CheckCircle, AlertCircle, Download, FileText, ExternalLink, Upload, ShieldAlert } from "lucide-react";
+import { ArrowLeft, User, Clock, CheckCircle, AlertCircle, Download, FileText, ExternalLink, Upload, ShieldAlert, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import TeacherUploadDialog from "./TeacherUploadDialog";
+import TeacherUploadGradeDialog from "./TeacherUploadGradeDialog";
 
 interface StudentSubmission {
   id: string;
