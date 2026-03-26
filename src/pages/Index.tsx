@@ -170,6 +170,23 @@ const Index = () => {
             ))}
           </div>
         </div>
+
+        {/* Featured Presentation */}
+        <div className="w-full max-w-3xl mt-12">
+          <div className="text-center space-y-2 mb-4">
+            <h2 className="text-xl font-semibold text-foreground">Authentic Assessment for the AI Era</h2>
+            <p className="text-sm text-muted-foreground">Learn how Solvia transforms student evaluation</p>
+          </div>
+          <div className="rounded-xl overflow-hidden border border-border shadow-sm bg-card">
+            <iframe
+              src="https://gamma.app/embed/t0mglqkc35aa3mq"
+              style={{ width: "100%", height: 450 }}
+              allow="fullscreen"
+              title="Authentic Assessment for the AI Era"
+              className="block"
+            />
+          </div>
+        </div>
       </main>
 
       {/* Parent Join Dialog */}
