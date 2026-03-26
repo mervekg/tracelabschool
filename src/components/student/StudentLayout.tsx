@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import SolviaLogo from "@/components/SolviaLogo";
 import { supabase } from "@/integrations/supabase/client";
 import LanguageSelector from "@/components/LanguageSelector";
+import ThemeToggle from "@/components/ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
