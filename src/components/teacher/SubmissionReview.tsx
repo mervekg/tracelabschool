@@ -182,7 +182,8 @@ const SubmissionReview = ({
               {submission.student?.full_name || "Unknown Student"}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {assignmentTitle} • {submission.status === "reviewed" || submission.status === "graded" ? "Graded" : "Pending Review"}
+              {assignmentTitle} •{" "}
+              {submission.status === "reviewed" ? "Released" : submission.status === "graded" ? "Draft — Not Released" : "Pending Review"}
             </p>
           </div>
         </div>
