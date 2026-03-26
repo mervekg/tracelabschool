@@ -35,6 +35,8 @@ interface StudentSubmissionsListProps {
   assignment: Assignment;
   submissions: StudentSubmission[];
   classId: string;
+  gradeLevel?: string;
+  subject?: string;
   onBack: () => void;
   onSelectSubmission: (submission: StudentSubmission) => void;
   onRefresh?: () => void;
@@ -44,6 +46,8 @@ const StudentSubmissionsList = ({
   assignment, 
   submissions,
   classId,
+  gradeLevel,
+  subject,
   onBack, 
   onSelectSubmission,
   onRefresh,
@@ -51,6 +55,7 @@ const StudentSubmissionsList = ({
   const { toast } = useToast();
   const [downloading, setDownloading] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [uploadGradeDialogOpen, setUploadGradeDialogOpen] = useState(false);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
