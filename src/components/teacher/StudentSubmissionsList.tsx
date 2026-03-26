@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { ArrowLeft, User, Clock, CheckCircle, AlertCircle, Download, FileText, ExternalLink, Upload, ShieldAlert } from "lucide-react";
+import { ArrowLeft, User, Clock, CheckCircle, AlertCircle, Download, FileText, ExternalLink, Upload, ShieldAlert, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import TeacherUploadDialog from "./TeacherUploadDialog";
+import TeacherUploadGradeDialog from "./TeacherUploadGradeDialog";
 
 interface StudentSubmission {
   id: string;
@@ -34,6 +35,8 @@ interface StudentSubmissionsListProps {
   assignment: Assignment;
   submissions: StudentSubmission[];
   classId: string;
+  gradeLevel?: string;
+  subject?: string;
   onBack: () => void;
   onSelectSubmission: (submission: StudentSubmission) => void;
   onRefresh?: () => void;
@@ -43,6 +46,8 @@ const StudentSubmissionsList = ({
   assignment, 
   submissions,
   classId,
+  gradeLevel,
+  subject,
   onBack, 
   onSelectSubmission,
   onRefresh,
@@ -50,13 +55,16 @@ const StudentSubmissionsList = ({
   const { toast } = useToast();
   const [downloading, setDownloading] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [uploadGradeDialogOpen, setUploadGradeDialogOpen] = useState(false);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "submitted":
         return <Badge variant="default">Submitted</Badge>;
+      case "graded":
+        return <Badge className="bg-amber-500 text-white">Draft Feedback</Badge>;
       case "reviewed":
-        return <Badge className="bg-green-600">Reviewed</Badge>;
+        return <Badge className="bg-green-600 text-white">Released</Badge>;
       case "pending":
       default:
         return <Badge variant="secondary">Pending</Badge>;
@@ -67,6 +75,8 @@ const StudentSubmissionsList = ({
     switch (status) {
       case "submitted":
         return <Clock className="w-4 h-4 text-primary" />;
+      case "graded":
+        return <Sparkles className="w-4 h-4 text-amber-500" />;
       case "reviewed":
         return <CheckCircle className="w-4 h-4 text-green-600" />;
       default:
@@ -195,14 +205,22 @@ const StudentSubmissionsList = ({
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {/* Upload Paper Test Button */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Upload & Auto-Grade (Primary action) */}
+          <Button 
+            onClick={() => setUploadGradeDialogOpen(true)}
+            className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-primary-foreground"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            Upload & Auto-Grade
+          </Button>
+          {/* Upload Only */}
           <Button 
             variant="outline" 
             onClick={() => setUploadDialogOpen(true)}
           >
             <Upload className="w-4 h-4 mr-2" />
-            Upload Paper Test
+            Upload Only
           </Button>
           <Button 
             variant="outline" 
@@ -215,7 +233,7 @@ const StudentSubmissionsList = ({
         </div>
       </div>
 
-      {/* Teacher Upload Dialog */}
+      {/* Teacher Upload Dialog (upload only) */}
       <TeacherUploadDialog
         open={uploadDialogOpen}
         onOpenChange={setUploadDialogOpen}
@@ -223,6 +241,19 @@ const StudentSubmissionsList = ({
         assignmentTitle={assignment.title}
         classId={classId}
         onUploadComplete={() => onRefresh?.()}
+      />
+
+      {/* Upload & Auto-Grade Dialog */}
+      <TeacherUploadGradeDialog
+        open={uploadGradeDialogOpen}
+        onOpenChange={setUploadGradeDialogOpen}
+        assignmentId={assignment.id}
+        assignmentTitle={assignment.title}
+        assignmentDescription={assignment.description || undefined}
+        classId={classId}
+        gradeLevel={gradeLevel}
+        subject={subject}
+        onComplete={() => onRefresh?.()}
       />
 
       {/* FERPA Privacy Notice */}

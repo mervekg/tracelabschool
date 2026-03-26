@@ -686,6 +686,8 @@ const TeacherClassDetail = () => {
                 assignment={selectedAssignment}
                 submissions={submissions}
                 classId={classId!}
+                gradeLevel={classInfo?.grade_level}
+                subject={classInfo?.subject}
                 onBack={handleBackToAssignments}
                 onSelectSubmission={handleSelectSubmission}
                 onRefresh={fetchClassData}
