@@ -8,6 +8,7 @@ import { User } from "@supabase/supabase-js";
 import SolviaLogo from "@/components/SolviaLogo";
 import ParentJoinDialog from "@/components/ParentJoinDialog";
 import LanguageSelector from "@/components/LanguageSelector";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Index = () => {
   const navigate = useNavigate();
