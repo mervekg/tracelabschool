@@ -337,6 +337,9 @@ const TeacherUploadGradeDialog = ({
               Upload & Grade with AI
             </Button>
           )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
