@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, User, Clock, CheckCircle, AlertCircle, Download, FileText, ExternalLink, Upload } from "lucide-react";
+import { ArrowLeft, User, Clock, CheckCircle, AlertCircle, Download, FileText, ExternalLink, Upload, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
