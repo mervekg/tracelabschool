@@ -139,7 +139,7 @@ const LandingPage = () => {
                 Request a Pilot <ArrowRight className="w-4 h-4" />
               </Button>
               <Button size="lg" variant="outline" className="gap-2 text-base px-8 border-white/20 text-white hover:bg-white/10" onClick={() => scrollToSection("how-it-works")}>
-                Watch 2-Minute Demo <ChevronDown className="w-4 h-4" />
+                Learn More <ChevronDown className="w-4 h-4" />
               </Button>
             </div>
             <p className="hero-slide-up-delay-2 text-sm text-white/50 italic">
