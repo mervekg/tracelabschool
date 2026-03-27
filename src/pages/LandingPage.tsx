@@ -219,9 +219,9 @@ const LandingPage = () => {
               </div>
             ))}
           </div>
-          {/* Visual mockup placeholder */}
-          <div className="mt-14 rounded-2xl border-2 border-dashed border-border bg-muted/20 h-64 flex items-center justify-center">
-            <p className="text-muted-foreground text-sm">App screenshot / mockup placeholder</p>
+          {/* Product mockup */}
+          <div className="mt-14 rounded-2xl overflow-hidden shadow-2xl border border-border">
+            <img src={solviaMockup} alt="Solvia LAB teacher review interface showing student reasoning analysis, AI insights, and rubric-based scoring" className="w-full h-auto" />
           </div>
         </div>
       </section>
