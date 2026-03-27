@@ -132,7 +132,7 @@ const LandingPage = () => {
               </span>
             </h1>
             <p className="hero-slide-up-delay text-lg md:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed">
-              Solvia helps schools reduce AI‑assisted cheating by making handwritten assessment practical again. Teachers can scan student work, apply rubrics, generate draft scores and feedback, and connect the process to existing LMS workflows — all while staying fully in control.
+              Solvia helps schools reduce AI‑assisted cheating by making handwritten assessment practical again. Teachers can scan student work, apply rubrics, generate draft scores and feedback, and connect the process to existing LMS workflows, all while staying fully in control.
             </p>
             <div className="hero-slide-up-delay-2 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" className="gap-2 text-base px-8 bg-emerald-500 hover:bg-emerald-600 text-white border-0" onClick={() => scrollToSection("pricing")}>
