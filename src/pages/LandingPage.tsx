@@ -126,15 +126,13 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-6 pt-20 pb-20 md:pt-32 md:pb-28 relative z-10">
           <div className="max-w-3xl mx-auto text-center space-y-8">
             <h1 className="hero-slide-up text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] text-white">
-              Keep exams handwritten.{" "}
+              Bring back authentic assessment{" "}
               <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-                Let AI handle the grading.
+                in the age of AI.
               </span>
             </h1>
             <p className="hero-slide-up-delay text-lg md:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed">
-              Solvia reads students' handwritten work, applies your rubrics, and
-              delivers draft scores and feedback — so you stay in control while
-              cutting grading time dramatically.
+              Solvia helps schools reduce AI‑assisted cheating by making handwritten assessment practical again. Teachers can scan student work, apply rubrics, generate draft scores and feedback, and connect the process to existing LMS workflows — all while staying fully in control.
             </p>
             <div className="hero-slide-up-delay-2 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" className="gap-2 text-base px-8 bg-emerald-500 hover:bg-emerald-600 text-white border-0" onClick={() => scrollToSection("pricing")}>
