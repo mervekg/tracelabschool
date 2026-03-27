@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import solviaMockup from "@/assets/solvia-mockup.png";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
