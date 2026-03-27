@@ -139,7 +139,7 @@ const LandingPage = () => {
               <Button size="lg" className="gap-2 text-base px-8 bg-emerald-500 hover:bg-emerald-600 text-white border-0" onClick={() => scrollToSection("pricing")}>
                 Request a Pilot <ArrowRight className="w-4 h-4" />
               </Button>
-              <Button size="lg" variant="outline" className="gap-2 text-base px-8 border-white/20 text-white hover:bg-white/10" onClick={() => scrollToSection("how-it-works")}>
+              <Button size="lg" variant="outline" className="gap-2 text-base px-8 border-white/40 text-white hover:bg-white/10 bg-white/10" onClick={() => scrollToSection("how-it-works")}>
                 Learn More <ChevronDown className="w-4 h-4" />
               </Button>
             </div>
