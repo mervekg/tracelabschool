@@ -287,9 +287,9 @@ const LandingPage = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { name: "Starter Pilot", audience: "For individual teachers", features: ["Up to 150 students", "Core handwritten grading features", "Rubric builder", "Email support"], cta: "Apply for Pilot", highlight: false },
-              { name: "School Plan", audience: "For departments", features: ["All teacher features", "Shared rubrics & basic analytics", "Onboarding + PD session", "Priority email support"], cta: "Talk to Sales", highlight: true },
-              { name: "District Plan", audience: "For multi-school deployments", features: ["Volume-based pricing", "SIS/LMS integrations & SSO", "Priority support & custom reporting", "Dedicated account manager"], cta: "Schedule a Call", highlight: false },
+              { name: "Starter Pilot", audience: "For individual teachers", price: "Free for 2 weeks", priceNote: "then $15/mo per teacher", features: ["Up to 60 students", "Core handwritten grading features", "Rubric builder", "Email support"], cta: "Start Free Trial", highlight: false },
+              { name: "School Plan", audience: "For departments (5+ teachers)", price: "$12/mo", priceNote: "per teacher, billed annually", features: ["Everything in Starter", "Shared rubrics & class analytics", "Onboarding + PD session", "Priority email support"], cta: "Talk to Sales", highlight: true },
+              { name: "District Plan", audience: "For multi-school deployments", price: "Custom", priceNote: "volume-based pricing", features: ["Everything in School", "SIS/LMS integrations & SSO", "Priority support & custom reporting", "Dedicated account manager"], cta: "Schedule a Call", highlight: false },
             ].map((plan) => (
               <Card key={plan.name} className={`p-6 flex flex-col border-border/60 hover:shadow-lg transition-shadow duration-300 ${plan.highlight ? "ring-2 ring-primary shadow-lg relative" : ""}`}>
                 {plan.highlight && (
@@ -298,7 +298,8 @@ const LandingPage = () => {
                 <div className="mb-6">
                   <h3 className="text-xl font-bold">{plan.name}</h3>
                   <p className="text-sm text-muted-foreground">{plan.audience}</p>
-                  <p className="text-2xl font-bold mt-3 text-foreground">Contact us</p>
+                  <p className="text-2xl font-bold mt-3 text-foreground">{plan.price}</p>
+                  <p className="text-xs text-muted-foreground">{plan.priceNote}</p>
                 </div>
                 <ul className="space-y-3 mb-8 flex-1">
                   {plan.features.map((f) => (
